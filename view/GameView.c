@@ -22,9 +22,21 @@
 
 // TODO: ADD YOUR OWN STRUCTS HERE
 
+typdef struct playerNode {
+	Player player;
+	char *pastPlays;
+}
+
 struct gameView {
+	Map map;
+	int CurrentScore;
+	Round round;
 	// TODO: ADD FIELDS HERE
 };
+
+
+
+
 
 ////////////////////////////////////////////////////////////////////////
 // Constructor/Destructor
