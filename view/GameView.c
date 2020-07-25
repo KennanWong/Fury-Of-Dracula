@@ -20,6 +20,7 @@
 #include "Places.h"
 // add your own #includes here
 
+#include "string.h"
 // TODO: ADD YOUR OWN STRUCTS HERE
 
 
@@ -35,7 +36,9 @@ struct gameView {
 	Map map;
 	int CurrentScore;
 	Round round;
-	Players *players;
+	Players **players;
+	Message *messages;
+	char *pastGamePlays;
 	// TODO: ADD FIELDS HERE
 };
 
@@ -58,35 +61,47 @@ GameView GvNew(char *pastPlays, Message messages[])
 	new->map = MapNew();					// initialise the new map
 	new->round = 0;							// initialise round number to 1
 	new->CurrentScore = GAME_START_SCORE;	// initialise game score to START_SCORE
-
+	new->players = malloc(5*sizeof(Players));
+	
 	// intialise the players
 	for (int i = 0; i < 5; i++){
-		Players newPlayer;
+		Players *newPlayer = malloc(sizeof(*newPlayer));
 		if (i == 0) {
-			newPlayer.player = PLAYER_LORD_GODALMING;
+			newPlayer->player = PLAYER_LORD_GODALMING;
 		} else if (i == 1) {
-			newPlayer.player = PLAYER_DR_SEWARD;
+			newPlayer->player = PLAYER_DR_SEWARD;
 		} else if (i == 2) {
-			newPlayer.player = PLAYER_VAN_HELSING;
+			newPlayer->player = PLAYER_VAN_HELSING;
 		} else if (i == 3) {
-			newPlayer.player = PLAYER_MINA_HARKER;
+			newPlayer->player = PLAYER_MINA_HARKER;
 		} else {
-			newPlayer.player = PLAYER_DRACULA;
+			newPlayer->player = PLAYER_DRACULA;
 		}
 		if (i <= 3) {
-			newPlayer.health = GAME_START_HUNTER_LIFE_POINTS;
+			newPlayer->health = GAME_START_HUNTER_LIFE_POINTS;
 		} else {
-			newPlayer.health = GAME_START_BLOOD_POINTS;
+			newPlayer->health = GAME_START_BLOOD_POINTS;
 		}
-		newPlayer.currLoc = -2;
+		newPlayer->currLoc = NOWHERE;
 		new->players[i] = newPlayer;
 	}
+
+	new->pastGamePlays = pastPlays;
+	new->messages = messages;
+
+	// process pastplays
+	/*
+	if (strlen(pastPlays) != 0) {
+	
+	}
+	*/
 	return new;
 }
 
 void GvFree(GameView gv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	MapFree(gv->map);
 	free(gv);
 }
 
@@ -96,31 +111,33 @@ void GvFree(GameView gv)
 Round GvGetRound(GameView gv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return 0;
+	return gv->round;
 }
 
 Player GvGetPlayer(GameView gv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return PLAYER_LORD_GODALMING;
+	// to find the current player
+	// gv->players[round%5]->player 
+	return gv->players[gv->round%5]->player;
 }
 
 int GvGetScore(GameView gv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return 0;
+	return gv->CurrentScore;
 }
 
 int GvGetHealth(GameView gv, Player player)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return 0;
+	return gv->players[player]->health;
 }
 
 PlaceId GvGetPlayerLocation(GameView gv, Player player)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return NOWHERE;
+	return gv->players[player]->currLoc;
 }
 
 PlaceId GvGetVampireLocation(GameView gv)
