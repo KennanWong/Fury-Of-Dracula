@@ -29,7 +29,7 @@ typedef struct{
 	Player player;
 	int health;
 	PlaceId currLoc; 
-	char *pastPlays;
+	char **pastPlays;
 }Players;
 
 struct gameView {
@@ -39,6 +39,7 @@ struct gameView {
 	Players **players;
 	Message *messages;
 	char *pastGamePlays;
+	int turnCounter;
 	// TODO: ADD FIELDS HERE
 };
 
@@ -62,7 +63,8 @@ GameView GvNew(char *pastPlays, Message messages[])
 	new->round = 0;							// initialise round number to 1
 	new->CurrentScore = GAME_START_SCORE;	// initialise game score to START_SCORE
 	new->players = malloc(5*sizeof(Players));
-	
+	new->turnCounter = 0;
+
 	// intialise the players
 	for (int i = 0; i < 5; i++){
 		Players *newPlayer = malloc(sizeof(*newPlayer));
@@ -83,24 +85,63 @@ GameView GvNew(char *pastPlays, Message messages[])
 			newPlayer->health = GAME_START_BLOOD_POINTS;
 		}
 		newPlayer->currLoc = NOWHERE;
+		newPlayer->pastPlays = malloc(sizeof *newPlayer->pastPlays);
 		new->players[i] = newPlayer;
-	}
-
-	new->pastGamePlays = pastPlays;
-	new->messages = messages;
-
-	// process pastplays
-	/*
-	if (strlen(pastPlays) != 0) {
 	
 	}
-	*/
+
+	new->messages = messages;
+
+	// process pastplays and seperate each to their respective players
+	// This is done so by first tokenising the past plays string splitting them into 6 character strings
+	// 'i' will be used to count the number of turns taken, this will be used to determine whose turn it is
+	// (i%5) and what game round we are in (i/5), i will also be used to determine the turn counter.
+	char *tempPastPlays = strdup(pastPlays);
+	if (strlen(pastPlays) != 0) {
+		// take each 6 char play seperately
+		printf("checking previous players moves\n");
+		char *str = strtok(tempPastPlays, " ");
+		printf("str = %s\n", str);
+		int i = 0;
+		while (str != NULL) {
+			// i%5 will determine who made the move
+			int playerId = i%5;
+			int gameRound = i/5;
+			Players *currPlayer = new->players[playerId];
+			
+			// add the 6char string to the players past plays
+			char *tmp = strdup(str);
+			currPlayer->pastPlays[gameRound] = tmp;
+			
+			// used to concatenate the 6 char string to the 2char city abbreviation
+			char placeAbbrev[2];
+			for (int i = 1; i < 3; i++) {
+				placeAbbrev[i-1] = str[i];
+			}
+			// Update the players current location
+			currPlayer->currLoc = placeAbbrevToId(placeAbbrev);
+			printf ("player %d went to %s\n", playerId, placeIdToName(placeAbbrevToId(placeAbbrev)));
+			i+=1;
+			str = strtok(NULL, " ");
+			new->round = gameRound;
+			new->turnCounter = i;
+		}
+		new->round = i/5;
+		
+	}
+	
+	new->pastGamePlays = tempPastPlays;
+	free(tempPastPlays);
 	return new;
 }
 
 void GvFree(GameView gv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	for (int i = 0; i < 5; i++) {
+		free(gv->players[i]->pastPlays);
+		free(gv->players[i]);
+	}
 	MapFree(gv->map);
 	free(gv);
 }
@@ -119,7 +160,7 @@ Player GvGetPlayer(GameView gv)
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	// to find the current player
 	// gv->players[round%5]->player 
-	return gv->players[gv->round%5]->player;
+	return gv->players[gv->turnCounter%5]->player;
 }
 
 int GvGetScore(GameView gv)
