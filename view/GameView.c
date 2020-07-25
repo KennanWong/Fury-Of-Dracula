@@ -22,15 +22,20 @@
 
 // TODO: ADD YOUR OWN STRUCTS HERE
 
-typdef struct playerNode {
+
+
+typedef struct{
 	Player player;
+	int health;
+	PlaceId currLoc; 
 	char *pastPlays;
-}
+}Players;
 
 struct gameView {
 	Map map;
 	int CurrentScore;
 	Round round;
+	Players *players;
 	// TODO: ADD FIELDS HERE
 };
 
@@ -50,6 +55,32 @@ GameView GvNew(char *pastPlays, Message messages[])
 		exit(EXIT_FAILURE);
 	}
 
+	new->map = MapNew();					// initialise the new map
+	new->round = 0;							// initialise round number to 1
+	new->CurrentScore = GAME_START_SCORE;	// initialise game score to START_SCORE
+
+	// intialise the players
+	for (int i = 0; i < 5; i++){
+		Players newPlayer;
+		if (i == 0) {
+			newPlayer.player = PLAYER_LORD_GODALMING;
+		} else if (i == 1) {
+			newPlayer.player = PLAYER_DR_SEWARD;
+		} else if (i == 2) {
+			newPlayer.player = PLAYER_VAN_HELSING;
+		} else if (i == 3) {
+			newPlayer.player = PLAYER_MINA_HARKER;
+		} else {
+			newPlayer.player = PLAYER_DRACULA;
+		}
+		if (i <= 3) {
+			newPlayer.health = GAME_START_HUNTER_LIFE_POINTS;
+		} else {
+			newPlayer.health = GAME_START_BLOOD_POINTS;
+		}
+		newPlayer.currLoc = -2;
+		new->players[i] = newPlayer;
+	}
 	return new;
 }
 
