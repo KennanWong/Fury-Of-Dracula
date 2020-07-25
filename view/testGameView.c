@@ -82,13 +82,21 @@ int main(void)
 		Message messages[4] = {};
 		GameView gv = GvNew(trail, messages);
 
+		printf("test1\n");
 		assert(GvGetRound(gv) == 0);
+		printf("test2\n");
 		assert(GvGetPlayer(gv) == PLAYER_DRACULA);
+		printf("test3\n");
 		assert(GvGetScore(gv) == GAME_START_SCORE);
+		printf("test4\n");
 		assert(GvGetPlayerLocation(gv, PLAYER_LORD_GODALMING) == STRASBOURG);
+		printf("test5\n");
 		assert(GvGetPlayerLocation(gv, PLAYER_DR_SEWARD) == ATLANTIC_OCEAN);
+		printf("test6\n");
 		assert(GvGetPlayerLocation(gv, PLAYER_VAN_HELSING) == ZURICH);
+		printf("test7\n");
 		assert(GvGetPlayerLocation(gv, PLAYER_MINA_HARKER) == BAY_OF_BISCAY);
+		printf("test8\n");
 		assert(GvGetPlayerLocation(gv, PLAYER_DRACULA) == NOWHERE);
 
 		GvFree(gv);
