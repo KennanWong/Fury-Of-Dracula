@@ -20,6 +20,7 @@
 #include "Places.h"
 // add your own #includes here
 
+#include "string.h"
 // TODO: ADD YOUR OWN STRUCTS HERE
 
 
@@ -36,7 +37,7 @@ struct gameView {
 	int CurrentScore;
 	Round round;
 	Players **players;
-	Message messages;
+	Message *messages;
 	char *pastGamePlays;
 	// TODO: ADD FIELDS HERE
 };
@@ -60,7 +61,8 @@ GameView GvNew(char *pastPlays, Message messages[])
 	new->map = MapNew();					// initialise the new map
 	new->round = 0;							// initialise round number to 1
 	new->CurrentScore = GAME_START_SCORE;	// initialise game score to START_SCORE
-	new->players = malloc(sizeof( *new->players));
+	new->players = malloc(5*sizeof(Players));
+	
 	// intialise the players
 	for (int i = 0; i < 5; i++){
 		Players *newPlayer = malloc(sizeof(*newPlayer));
@@ -83,6 +85,16 @@ GameView GvNew(char *pastPlays, Message messages[])
 		newPlayer->currLoc = NOWHERE;
 		new->players[i] = newPlayer;
 	}
+
+	new->pastGamePlays = pastPlays;
+	new->messages = messages;
+
+	// process pastplays
+	/*
+	if (strlen(pastPlays) != 0) {
+	
+	}
+	*/
 	return new;
 }
 
@@ -105,25 +117,27 @@ Round GvGetRound(GameView gv)
 Player GvGetPlayer(GameView gv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return PLAYER_LORD_GODALMING;
+	// to find the current player
+	// gv->players[round%5]->player 
+	return gv->players[gv->round%5]->player;
 }
 
 int GvGetScore(GameView gv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return 0;
+	return gv->CurrentScore;
 }
 
 int GvGetHealth(GameView gv, Player player)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return 0;
+	return gv->players[player]->health;
 }
 
 PlaceId GvGetPlayerLocation(GameView gv, Player player)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return NOWHERE;
+	return gv->players[player]->currLoc;
 }
 
 PlaceId GvGetVampireLocation(GameView gv)
