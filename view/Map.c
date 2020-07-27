@@ -24,6 +24,9 @@ struct map {
 	int nV; // number of vertices
 	int nE; // number of edges
 	ConnList connections[NUM_REAL_PLACES];
+	ConnList BSTHead;
+	PlaceId *TrapLocations;
+	int numTrapLocations;
 };
 
 static void addConnections(Map m);
@@ -50,8 +53,19 @@ Map MapNew(void)
 	for (int i = 0; i < NUM_REAL_PLACES; i++) {
 		m->connections[i] = NULL;
 	}
-
 	addConnections(m);
+	
+	for (int i = 0; i < NUM_REAL_PLACES; i++) {
+		// m->connections[i]->traps = malloc(sizeof(*m->connections[i]->traps));
+		m->connections[i]->numTraps = 0;
+		m->connections[i]->DraculasTrail = 0;
+		m->connections[i]->numTraps = 0;
+		m->connections[i]->vampireState = 0;
+	}
+
+	m->TrapLocations = malloc(sizeof(*m->TrapLocations));
+	m->numTrapLocations = 0;
+
 	return m;
 }
 
@@ -62,12 +76,16 @@ void MapFree(Map m)
 
 	for (int i = 0; i < m->nV; i++) {
 		ConnList curr = m->connections[i];
+		// free(m->connections[i]->traps);
+		printf("freed traps, now will free adjacency list\n");
 		while (curr != NULL) {
 			ConnList next = curr->next;
 			free(curr);
 			curr = next;
 		}
+		
 	}
+	free(m->TrapLocations);
 	free(m);
 }
 
@@ -167,6 +185,9 @@ static ConnList connListInsert(ConnList l, PlaceId p, TransportType type)
 	new->p = p;
 	new->type = type;
 	new->next = l;
+
+	// form BST
+
 	return new;
 }
 
@@ -194,3 +215,49 @@ ConnList MapGetConnections(Map m, PlaceId p)
 }
 
 ////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////
+// Newly added functions
+
+void AddTrapToLoc(PlaceId id, Map m) {
+	ConnList Loc = m->connections[id];
+	// Loc->traps[Loc->numTraps] = 'T';
+	Loc->numTraps += 1;
+}
+
+void AddVampireToLoc(PlaceId id, Map m) {
+	/*
+	May not be necessary
+	ConnList Loc = m->connections[id-1]->;
+	printf("check1.1\n");
+	assert(Loc->p == id);
+	Loc->vampireState = 1;
+	printf("check1.3\n");
+	*/ 
+	
+}
+
+void RemoveVampireFromLoc(PlaceId id, Map m) {
+	ConnList Loc = m->connections[id-2];
+	Loc->vampireState = 0;
+}
+
+// Removes a single trap
+void RemoveTrapFromLoc(PlaceId id, Map m){
+	ConnList Loc = m->connections[id];
+	// Loc->traps[i] = '0';
+	Loc->numTraps -= 1;
+}
+
+// Removes all traps
+void RemoveTrapsFromLoc(PlaceId id, Map m) {
+	ConnList Loc = m->connections[id];
+	Loc->numTraps = 0;
+}
+
+
+// Returns number of traps at a location
+int GetTrapsLoc(PlaceId Loc, Map m) {
+	return m->connections[Loc]->numTraps;
+}
