@@ -201,9 +201,39 @@ PlaceId *GvGetMoveHistory(GameView gv, Player player,
                           int *numReturnedMoves, bool *canFree)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numReturnedMoves = 0;
+	PlaceId *target = malloc(gv->round*sizeof(PlaceId));
+	int n = 0;
+	while(n < gv->players[player]->numTurns) {
+		char placeAbbrev[2];
+		placeAbbrev[0] = gv->players[player]->pastPlays[n][1];
+		placeAbbrev[1] = gv->players[player]->pastPlays[n][2];
+		target[n] = placeAbbrevToId(placeAbbrev);
+
+		//If the given abbrev is city move (unknown city)
+		if(placeAbbrev[0] == 'C' && placeAbbrev[1] == '?') target[n] = CITY_UNKNOWN;
+
+		//If the given abbrev is sea move (unknown sea)
+		if(placeAbbrev[0] == 'S' && placeAbbrev[1] == '?') target[n] = SEA_UNKNOWN;
+
+		//If the given abbrev is Dn
+		if(placeAbbrev[0] == 'D' && placeAbbrev[1] != 'U') {
+			if(placeAbbrev[1] == 49) target[n] = DOUBLE_BACK_1;
+			if(placeAbbrev[1] == 50) target[n] = DOUBLE_BACK_2;
+			if(placeAbbrev[1] == 51) target[n] = DOUBLE_BACK_3;
+			if(placeAbbrev[1] == 52) target[n] = DOUBLE_BACK_4;
+			if(placeAbbrev[1] == 53) target[n] = DOUBLE_BACK_5;
+				
+		}
+
+		//If the given abbrev is HI
+		if(placeAbbrev[0] == 'H' && placeAbbrev[1] == 'I') {
+			target[n] = target[n-1];
+		}
+		n++;
+	}
+	*numReturnedMoves = gv->players[player]->numTurns;
 	*canFree = false;
-	return NULL;
+	return target;
 }
 
 PlaceId *GvGetLastMoves(GameView gv, Player player, int numMoves,
@@ -219,9 +249,51 @@ PlaceId *GvGetLocationHistory(GameView gv, Player player,
                               int *numReturnedLocs, bool *canFree)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numReturnedLocs = 0;
+	PlaceId *target = malloc(gv->round*sizeof(PlaceId));
+	int n = 0;
+	//Checking if the player is Dracula
+	if(player == PLAYER_DRACULA) {
+		
+		while(gv->players[player]->pastPlays[n] != NULL) {
+			char placeAbbrev[2];
+			placeAbbrev[0] = gv->players[player]->pastPlays[n][1];
+			placeAbbrev[1] = gv->players[player]->pastPlays[n][2];
+			target[n] = placeAbbrevToId(placeAbbrev);
+
+			//If the given abbrev is city move (unknown city)
+			if(placeAbbrev[0] == 'C' && placeAbbrev[1] == '?') target[n] = CITY_UNKNOWN;
+
+			//If the given abbrev is sea move (unknown sea)
+			if(placeAbbrev[0] == 'S' && placeAbbrev[1] == '?') target[n] = SEA_UNKNOWN;
+
+			//If the given abbrev is Dn
+			if(placeAbbrev[0] == 'D' && placeAbbrev[1] != 'U') {
+				if(placeAbbrev[1] == 49) target[n] = target[n-1];
+				if(placeAbbrev[1] == 50) target[n] = target[n-2];
+				if(placeAbbrev[1] == 51) target[n] = target[n-3];
+				if(placeAbbrev[1] == 52) target[n] = target[n-4];
+				if(placeAbbrev[1] == 53) target[n] = target[n-5];
+			}
+
+			//If the given abbrev is HI
+			if(placeAbbrev[0] == 'H' && placeAbbrev[1] == 'I') {
+				target[n] = target[n-1];
+			}
+			printf("%d\n",n);
+			printf("%s\n",placeIdToName(target[n]));
+			printf("%s\n",placeAbbrev);
+			n++;
+			
+		}
+		*numReturnedLocs = n;
+	}
+	//Otherwise it is a hunter
+	else {
+		target = GvGetMoveHistory(gv,player,numReturnedLocs,canFree);
+	}
+	
 	*canFree = false;
-	return NULL;
+	return target;
 }
 
 PlaceId *GvGetLastLocations(GameView gv, Player player, int numLocs,
