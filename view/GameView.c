@@ -383,7 +383,11 @@ void ProcessHunter(GameView gv, char *move, Players *player){
 	if (currLoc == player->currLoc) {
 		// the player has rest
 		// increase health
-		player->health = player->health + LIFE_GAIN_REST;
+		if (player->health + LIFE_GAIN_REST > GAME_START_HUNTER_LIFE_POINTS) {
+			player->health = GAME_START_HUNTER_LIFE_POINTS;
+		} else {
+			player->health = player->health + LIFE_GAIN_REST;
+		}	
 	} else {
 		player->currLoc = currLoc;
 	}
@@ -393,6 +397,7 @@ void ProcessHunter(GameView gv, char *move, Players *player){
 		if (action[i] == 'T') {
 			printf("player encountered a trap\n");
 			player->health = player->health - LIFE_LOSS_TRAP_ENCOUNTER;
+			printf("players new health: %d\n", player->health);
 			RemoveTrapFromLoc(currLoc, gv->map);
 		} else if (action[i] == 'V') {
 			// Vanquish vampire
