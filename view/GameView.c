@@ -160,9 +160,35 @@ PlaceId *GvGetMoveHistory(GameView gv, Player player,
                           int *numReturnedMoves, bool *canFree)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	//eg to look at a players past moves:
+	// gv->players[LORD_GODALMIN]-> pastPlays
+
+	int *move_array;
+	move_array = (int *)malloc(n*sizeof(int)*100);
+	
+	if (move_array != NULL) {
+		for (j = 0; j < 100; j++) {
+			move_array[j] = 0;
+		}
+		int playerId = i%5;
+		int gameRound = i/5;
+		while (gameRound <= 5) {
+			Players *currPlayer = new->players[playerId];
+			if (currPlayer != NULL) {
+				char *tmp = strdup(str);
+				currPlayer->pastPlays[gameRound] = tmp;
+			}
+		}
+	}
+
+	//gv->players[player]->pastPlays;
 	*numReturnedMoves = 0;
+	while (numReturnedMoves < ) {
+		numReturnedMoves++;
+	}
 	*canFree = false;
-	return NULL;
+	return numReturnedMoves;
+	
 }
 
 PlaceId *GvGetLastMoves(GameView gv, Player player, int numMoves,

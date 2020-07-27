@@ -22,7 +22,20 @@
 
 // TODO: ADD YOUR OWN STRUCTS HERE
 
+typedef struct{
+	Player player;
+	int health;
+	PlaceId currLoc; 
+	char *pastPlays;
+}Players;
+
 struct draculaView {
+	Map map;
+	int CurrentScore;
+	Round round;
+	Players **players;
+	Message *messages;
+	char *pastGamePlays;
 	// TODO: ADD FIELDS HERE
 };
 
@@ -38,12 +51,34 @@ DraculaView DvNew(char *pastPlays, Message messages[])
 		exit(EXIT_FAILURE);
 	}
 
+	new->map = MapNew();					// initialise the new map
+	new->round = 0;							// initialise round number to 1
+	new->CurrentScore = GAME_START_SCORE;	// initialise game score to START_SCORE
+	new->players = malloc(5*sizeof(Players));
+	new->turnCounter = 0;
+
+	//initiaLise the dracula player
+
+	Players *newPlayer = malloc(sizeof(*newPlayer));
+	newPlayer->player = PLAYER_DRACULA;
+	newPlayer->health = GAME_START_BLOOD_POINTS;
+	
+	newPlayer->currLoc = NOWHERE;
+	newPlayer->pastPlays = malloc(sizeof *newPlayer->pastPlays);
+	new->players = newPlayer;
+	
+	new->messages = messages;
 	return new;
 }
 
 void DvFree(DraculaView dv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+
+	free(dv->players->pastPlays);
+	free(dv->players);
+	
+	MapFree(dv->map);
 	free(dv);
 }
 
@@ -53,25 +88,28 @@ void DvFree(DraculaView dv)
 Round DvGetRound(DraculaView dv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return 0;
+	return dv->round;
 }
 
 int DvGetScore(DraculaView dv)
 {
+	//Note: Dracula wants the game score to be low.
+
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return 0;
+	return dv->CurrentScore;
 }
 
 int DvGetHealth(DraculaView dv, Player player)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return 0;
+	return dv->players[player]->health;
 }
 
 PlaceId DvGetPlayerLocation(DraculaView dv, Player player)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return NOWHERE;
+	return dv->players[player]->currLoc;
+}
 }
 
 PlaceId DvGetVampireLocation(DraculaView dv)
