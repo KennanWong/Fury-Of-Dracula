@@ -61,14 +61,9 @@ void ProcessDracula(GameView gv, char *move);
 
 void ProcessHunter(GameView gv, char *move, Players *player);
 
-void ProcessHunter(GameView gv, char *move, Players *player);
 
 void MatureVampire(GameView gv);
 
-void MatureVampire(GameView gv);
-
-
-void showPlayersMoves(Players *player);
 
 ////////////////////////////////////////////////////////////////////////
 // Constructor/Destructor
@@ -130,7 +125,6 @@ GameView GvNew(char *pastPlays, Message messages[])
 		this must be split as it weill be different for hunters and the dracula
 	3. move onto the next player
 	4. once we process one entire round, update round counter, and deduct points accordingly
-
 	*/
 	// Processing the moves of each player
 	char *tempPastPlays = strdup(pastPlays);
@@ -255,43 +249,9 @@ PlaceId *GvGetMoveHistory(GameView gv, Player player,
                           int *numReturnedMoves, bool *canFree)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	PlaceId *target = malloc(gv->round*sizeof(PlaceId));
-	int pInitial = 0;
-	if(player == 0) pInitial = 'G';
-	else if(player == 1) pInitial = 'S';
-	else if(player == 2) pInitial = 'H';
-	else if(player == 3) pInitial = 'M';
-	else if(player == 4) pInitial = 'D';
-	int n = 0;
-	char *str = strtok(gv->pastGamePlays," ");
-	if(str[0] == pInitial) {
-		char placeAbbrev[2];
-		placeAbbrev[0] = str[1];
-		placeAbbrev[1] = str[2]; 
-		//If the given abbrev is city move (unknown city)
-		if(placeAbbrev[0] == 'C' && placeAbbrev[1] == '?') target[n] = CITY_UNKNOWN;
-
-		//If the given abbrev is sea move (unknown sea)
-		else if(placeAbbrev[0] == 'S' && placeAbbrev[1] == '?') target[n] = SEA_UNKNOWN;
-
-		//If the given abbrev is Dn
-		else if(placeAbbrev[0] == 'D' && placeAbbrev[1] != 'U') {
-			if(placeAbbrev[1] == 49) target[n] = target[n-1];
-			else if(placeAbbrev[1] == 50) target[n] = target[n-2];
-			else if(placeAbbrev[1] == 51) target[n] = target[n-3];
-			else if(placeAbbrev[1] == 52) target[n] = target[n-4];
-			else if(placeAbbrev[1] == 53) target[n] = target[n-5];
-		}
-
-		//If the given abbrev is HI
-		else if(placeAbbrev[0] == 'H' && placeAbbrev[1] == 'I') {
-			target[n] = target[n-1];
-		}
-		else target[n] = placeAbbrevToId(placeAbbrev);
-	} else str = strtok(NULL," ");
-	*numReturnedMoves = gv->players[player]->numTurns;
+	*numReturnedMoves = 0;
 	*canFree = false;
-	return target;
+	return NULL;
 }
 
 PlaceId *GvGetLastMoves(GameView gv, Player player, int numMoves,
@@ -307,50 +267,7 @@ PlaceId *GvGetLocationHistory(GameView gv, Player player,
                               int *numReturnedLocs, bool *canFree)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	/*
-	PlaceId *target = malloc(gv->round*sizeof(PlaceId));
-	int n = 0;
-	//Checking if the player is Dracula
-	if(player == PLAYER_DRACULA) {
-		
-		while(gv->players[player]->pastPlays[n] != NULL) {
-			char placeAbbrev[2];
-			placeAbbrev[0] = gv->players[player]->pastPlays[n][1];
-			placeAbbrev[1] = gv->players[player]->pastPlays[n][2];
-			target[n] = placeAbbrevToId(placeAbbrev);
-
-			//If the given abbrev is city move (unknown city)
-			if(placeAbbrev[0] == 'C' && placeAbbrev[1] == '?') target[n] = CITY_UNKNOWN;
-
-			//If the given abbrev is sea move (unknown sea)
-			if(placeAbbrev[0] == 'S' && placeAbbrev[1] == '?') target[n] = SEA_UNKNOWN;
-
-			//If the given abbrev is Dn
-			if(placeAbbrev[0] == 'D' && placeAbbrev[1] != 'U') {
-				if(placeAbbrev[1] == 49) target[n] = target[n-1];
-				if(placeAbbrev[1] == 50) target[n] = target[n-2];
-				if(placeAbbrev[1] == 51) target[n] = target[n-3];
-				if(placeAbbrev[1] == 52) target[n] = target[n-4];
-				if(placeAbbrev[1] == 53) target[n] = target[n-5];
-			}
-
-			//If the given abbrev is HI
-			if(placeAbbrev[0] == 'H' && placeAbbrev[1] == 'I') {
-				target[n] = target[n-1];
-			}
-			printf("%d\n",n);
-			printf("%s\n",placeIdToName(target[n]));
-			printf("%s\n",placeAbbrev);
-			n++;
-			
-		}
-		*numReturnedLocs = n;
-	}
-	//Otherwise it is a hunter
-	else {
-		target = GvGetMoveHistory(gv,player,numReturnedLocs,canFree);
-	}
-	*/
+	*numReturnedLocs = 0;
 	*canFree = false;
 	return NULL;
 }
@@ -460,6 +377,7 @@ void ProcessDracula(GameView gv, char *move) {
 
 
 void ProcessHunter(GameView gv, char *move, Players *player){
+
 	PlaceId currLoc = CityIdFromMove(move);
 	if (currLoc == player->currLoc) {
 		// the player has rest
@@ -503,4 +421,3 @@ void MatureVampire(GameView gv) {
 	gv->VampireStatus = 10;
 	gv->RoundOfVampire = -1;
 }
-
