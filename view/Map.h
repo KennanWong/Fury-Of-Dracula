@@ -23,6 +23,10 @@ struct connNode {
 	PlaceId p; // ALICANTE, etc.
 	TransportType type; // ROAD, RAIL, BOAT
 	ConnList next; // link to next node
+	char *traps;
+	int numTraps;
+	int vampireState;		// 0 if there is no vampire, 1 if it is immature
+	int DraculasTrail;		// int value to represent where it is in the trail
 };
 
 // Map representation is hidden
@@ -48,5 +52,27 @@ int MapNumConnections(Map m, TransportType type);
  *  The returned list should NOT be modified or freed.
  */
 ConnList MapGetConnections(Map m, PlaceId p);
+
+
+/** Adds a trap to a given city*/
+void AddTrapToLoc(PlaceId id, Map m);
+
+/** Adds a vampire to a given city*/
+void AddVampireToLoc(PlaceId id, Map m);
+
+/** Removes a mature vampire from a given city */
+void RemoveVampireFromLoc(PlaceId id, Map m);
+
+
+/** Removes a trave from a given city */
+void RemoveTrapFromLoc(PlaceId id, Map m);
+
+/** Removes all traps from a given city */
+void RemoveTrapsFromLoc(PlaceId id, Map m);
+
+
+/** Returns number of traps at a location */
+int GetTrapsLoc(PlaceId Loc, Map m);
+
 
 #endif // !defined(FOD__MAP_H_)

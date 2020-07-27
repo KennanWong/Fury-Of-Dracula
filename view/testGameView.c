@@ -34,19 +34,19 @@ int main(void)
 		GameView gv = GvNew(trail, messages);
 
 		assert(GvGetRound(gv) == 0);
-		printf("check gameview\n");
+	
 		assert(GvGetPlayer(gv) == PLAYER_LORD_GODALMING);
-		printf("check first player\n");
+
 		assert(GvGetScore(gv) == GAME_START_SCORE);
-		printf("check score\n");
+	
 		assert(GvGetHealth(gv, PLAYER_LORD_GODALMING) == GAME_START_HUNTER_LIFE_POINTS);
-		printf("check hunter health\n");
+	
 		assert(GvGetHealth(gv, PLAYER_DRACULA) == GAME_START_BLOOD_POINTS);
-		printf("check dracula healtj\n");
+		
 		assert(GvGetPlayerLocation(gv, PLAYER_LORD_GODALMING) == NOWHERE);
-		printf("check player location\n");
+
 		assert(GvGetVampireLocation(gv) == NOWHERE);
-		printf("check campire location\n");
+	
 
 		GvFree(gv);
 		printf("Test passed!\n");
@@ -109,21 +109,32 @@ int main(void)
 		GameView gv = GvNew(trail, messages);
 
 		assert(GvGetRound(gv) == 1);
+		
 		assert(GvGetPlayer(gv) == PLAYER_LORD_GODALMING);
+
 		assert(GvGetScore(gv) == GAME_START_SCORE - SCORE_LOSS_DRACULA_TURN);
+
 		assert(GvGetHealth(gv, PLAYER_LORD_GODALMING) == GAME_START_HUNTER_LIFE_POINTS);
+
 		assert(GvGetHealth(gv, PLAYER_DRACULA) == GAME_START_BLOOD_POINTS);
+
 		assert(GvGetPlayerLocation(gv, PLAYER_LORD_GODALMING) == STRASBOURG);
+
 		assert(GvGetPlayerLocation(gv, PLAYER_DR_SEWARD) == ATLANTIC_OCEAN);
+
 		assert(GvGetPlayerLocation(gv, PLAYER_VAN_HELSING) == ZURICH);
+
 		assert(GvGetPlayerLocation(gv, PLAYER_MINA_HARKER) == BAY_OF_BISCAY);
+
 		assert(GvGetPlayerLocation(gv, PLAYER_DRACULA) == CITY_UNKNOWN);
+
 		assert(GvGetVampireLocation(gv) == CITY_UNKNOWN);
+
 
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
-
+	/*
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("Encountering Dracula\n");
@@ -266,7 +277,7 @@ int main(void)
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
-	
+	*/
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("Testing vampire/trap locations\n");
@@ -284,6 +295,7 @@ int main(void)
 		assert(GvGetVampireLocation(gv) == CASTLE_DRACULA);
 		int numTraps = 0;
 		PlaceId *traps = GvGetTrapLocations(gv, &numTraps);
+		printf("numTraps = %d\n", numTraps);
 		assert(numTraps == 2);
 		sortPlaces(traps, numTraps);
 		assert(traps[0] == GALATZ && traps[1] == KLAUSENBURG);
@@ -313,6 +325,7 @@ int main(void)
 		assert(GvGetVampireLocation(gv) == BUCHAREST);
 		int numTraps = 0;
 		PlaceId *traps = GvGetTrapLocations(gv, &numTraps);
+		
 		assert(numTraps == 2);
 		sortPlaces(traps, numTraps);
 		assert(traps[0] == CONSTANTA && traps[1] == GALATZ);
