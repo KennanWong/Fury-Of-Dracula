@@ -239,8 +239,10 @@ void AddVampireToLoc(PlaceId id, Map m) {
 }
 
 void RemoveVampireFromLoc(PlaceId id, Map m) {
-	ConnList Loc = m->connections[id-2];
+	printf("we removing it from this location\n");
+	ConnList Loc = m->connections[id];
 	Loc->vampireState = 0;
+	printf("done\n");
 }
 
 // Removes a single trap
