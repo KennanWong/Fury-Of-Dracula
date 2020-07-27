@@ -332,7 +332,10 @@ void ProcessDracula(GameView gv, char *move) {
 		bool canFree = true;
 		PlaceId *DraculaTrail = malloc(7*sizeof(PlaceId));
 		DraculaTrail = GvGetLastLocations(gv, Dracula->player, 7, &NumRetrunedLocations, &canFree);
-		currLoc = DraculaTrail[move[2] - '0'];
+		if ((move[2] - '0') < NumRetrunedLocations) {
+			currLoc = DraculaTrail[move[2] - '0'];
+		}
+		
 		free(DraculaTrail);
 	} else if (currLoc == HIDE) {
 		currLoc = Dracula->currLoc;
@@ -346,6 +349,7 @@ void ProcessDracula(GameView gv, char *move) {
 	ActionFromMove(move, action);
 	if (action[0] == 'T') {
 		// Add trap to location
+		printf("adding trap\n");
 		AddTrapToLoc(currLoc, gv->map);
 		printf("added trap to location\n");
 	}

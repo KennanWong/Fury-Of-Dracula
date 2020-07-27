@@ -27,6 +27,7 @@ struct map {
 	ConnList BSTHead;
 	PlaceId *TrapLocations;
 	int numTrapLocations;
+	int numTrapsUnknown;
 };
 
 static void addConnections(Map m);
@@ -65,6 +66,7 @@ Map MapNew(void)
 
 	m->TrapLocations = malloc(sizeof(*m->TrapLocations));
 	m->numTrapLocations = 0;
+	m->numTrapsUnknown = 0;
 
 	return m;
 }
@@ -221,9 +223,14 @@ ConnList MapGetConnections(Map m, PlaceId p)
 // Newly added functions
 
 void AddTrapToLoc(PlaceId id, Map m) {
-	ConnList Loc = m->connections[id];
-	// Loc->traps[Loc->numTraps] = 'T';
-	Loc->numTraps += 1;
+	if (id > MAX_REAL_PLACE) {
+		m->numTrapsUnknown += 1;
+	} else {
+		ConnList Loc = m->connections[id];
+		// Loc->traps[Loc->numTraps] = 'T';
+		Loc->numTraps += 1;	
+	}
+	
 }
 
 void AddVampireToLoc(PlaceId id, Map m) {
@@ -239,7 +246,6 @@ void AddVampireToLoc(PlaceId id, Map m) {
 }
 
 void RemoveVampireFromLoc(PlaceId id, Map m) {
-	printf("we removing it from this location\n");
 	ConnList Loc = m->connections[id];
 	Loc->vampireState = 0;
 	printf("done\n");
@@ -247,9 +253,13 @@ void RemoveVampireFromLoc(PlaceId id, Map m) {
 
 // Removes a single trap
 void RemoveTrapFromLoc(PlaceId id, Map m){
-	ConnList Loc = m->connections[id];
-	// Loc->traps[i] = '0';
-	Loc->numTraps -= 1;
+	if (id > MAX_REAL_PLACE) {
+		m->numTrapsUnknown -= 1;
+	} else {
+		ConnList Loc = m->connections[id];
+		// Loc->traps[i] = '0';
+		Loc->numTraps -= 1;
+	}
 }
 
 // Removes all traps
