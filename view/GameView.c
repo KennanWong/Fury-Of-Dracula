@@ -257,12 +257,12 @@ PlaceId *GvGetMoveHistory(GameView gv, Player player,
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	PlaceId *target = malloc(gv->round*sizeof(PlaceId));
 	int pInitial = 0;
-	if(player == 0) pInitial = 'G'
+	if(player == 0) pInitial = 'G';
 	else if(player == 1) pInitial = 'S';
 	else if(player == 2) pInitial = 'H';
 	else if(player == 3) pInitial = 'M';
 	else if(player == 4) pInitial = 'D';
-	
+	int n = 0;
 	char *str = strtok(gv->pastGamePlays," ");
 	if(str[0] == pInitial) {
 		char placeAbbrev[2];
@@ -307,6 +307,7 @@ PlaceId *GvGetLocationHistory(GameView gv, Player player,
                               int *numReturnedLocs, bool *canFree)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	/*
 	PlaceId *target = malloc(gv->round*sizeof(PlaceId));
 	int n = 0;
 	//Checking if the player is Dracula
@@ -349,9 +350,9 @@ PlaceId *GvGetLocationHistory(GameView gv, Player player,
 	else {
 		target = GvGetMoveHistory(gv,player,numReturnedLocs,canFree);
 	}
-	
+	*/
 	*canFree = false;
-	return target;
+	return NULL;
 }
 
 PlaceId *GvGetLastLocations(GameView gv, Player player, int numLocs,

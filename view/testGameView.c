@@ -134,7 +134,7 @@ int main(void)
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
-	/*
+
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("Encountering Dracula\n");
@@ -277,7 +277,7 @@ int main(void)
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
-	*/
+	
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("Testing vampire/trap locations\n");
@@ -362,7 +362,7 @@ int main(void)
 	}
 	*/
 	{///////////////////////////////////////////////////////////////////
-	
+		
 		printf("Testing move/location history\n");
 		
 		char *trail =
