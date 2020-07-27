@@ -312,6 +312,7 @@ PlaceId CityIdFromMove(char *str) {
 	for (int i = 1; i < 3; i++) {
 		abbrev[i-1] = str[i];
 	}
+	printf("abbreviation = %s\n", abbrev);
 	return placeAbbrevToId(abbrev);
 }
 
