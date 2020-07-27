@@ -134,7 +134,7 @@ int main(void)
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
-	
+	/*
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("Encountering Dracula\n");
@@ -277,7 +277,7 @@ int main(void)
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
-
+	*/
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("Testing vampire/trap locations\n");
@@ -295,7 +295,7 @@ int main(void)
 		assert(GvGetVampireLocation(gv) == CASTLE_DRACULA);
 		int numTraps = 0;
 		PlaceId *traps = GvGetTrapLocations(gv, &numTraps);
-		printf("numTraps = %d\n", numTraps);
+		
 		assert(numTraps == 2);
 		sortPlaces(traps, numTraps);
 		assert(traps[0] == GALATZ && traps[1] == KLAUSENBURG);
