@@ -23,7 +23,6 @@ struct connNode {
 	PlaceId p; // ALICANTE, etc.
 	TransportType type; // ROAD, RAIL, BOAT
 	ConnList next; // link to next node
-	char *traps;
 	int numTraps;
 	int vampireState;		// 0 if there is no vampire, 1 if it is immature
 	int DraculasTrail;		// int value to represent where it is in the trail

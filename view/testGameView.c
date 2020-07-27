@@ -65,6 +65,8 @@ int main(void)
 		assert(GvGetRound(gv) == 0);
 		assert(GvGetPlayer(gv) == PLAYER_DR_SEWARD);
 		assert(GvGetScore(gv) == GAME_START_SCORE);
+		printf("strasbourg = %d\n", STRASBOURG);
+		printf("current location = %d\n",GvGetPlayerLocation(gv, PLAYER_LORD_GODALMING));
 		assert(GvGetPlayerLocation(gv, PLAYER_LORD_GODALMING) == STRASBOURG);
 		assert(GvGetPlayerLocation(gv, PLAYER_DR_SEWARD) == NOWHERE);
 
@@ -278,6 +280,7 @@ int main(void)
 		printf("Test passed!\n");
 	}
 	*/
+
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("Testing vampire/trap locations\n");
@@ -295,7 +298,7 @@ int main(void)
 		assert(GvGetVampireLocation(gv) == CASTLE_DRACULA);
 		int numTraps = 0;
 		PlaceId *traps = GvGetTrapLocations(gv, &numTraps);
-		printf("numTraps = %d\n", numTraps);
+		
 		assert(numTraps == 2);
 		sortPlaces(traps, numTraps);
 		assert(traps[0] == GALATZ && traps[1] == KLAUSENBURG);

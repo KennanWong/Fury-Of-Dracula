@@ -29,7 +29,6 @@ typedef struct{
 	Player player;
 	int health;
 	PlaceId currLoc; 
-	char **pastPlays;
 	int numTurns;
 }Players;
 
@@ -66,8 +65,6 @@ void ProcessHunter(GameView gv, char *move, Players *player);
 void MatureVampire(GameView gv);
 
 
-void showPlayersMoves(Players *player);
-
 ////////////////////////////////////////////////////////////////////////
 // Constructor/Destructor
 
@@ -83,7 +80,7 @@ GameView GvNew(char *pastPlays, Message messages[])
 	new->map = MapNew();					// initialise the new map
 	new->round = 0;							// initialise round number to 1
 	new->CurrentScore = GAME_START_SCORE;	// initialise game score to START_SCORE
-	new->players = malloc(5*sizeof(Players));
+	new->players = malloc(5*sizeof(Players));	// an array of PlayerStructs
 	new->turnCounter = 0;
 	new->VampireLocation = NOWHERE;
 	new->VampireStatus = 0;
@@ -91,7 +88,7 @@ GameView GvNew(char *pastPlays, Message messages[])
 
 	// intialise the players
 	for (int i = 0; i < 5; i++){
-		Players *newPlayer = malloc(sizeof(*newPlayer));
+		Players *newPlayer = malloc(sizeof(Players));
 		if (i == 0) {
 			newPlayer->player = PLAYER_LORD_GODALMING;
 		} else if (i == 1) {
@@ -109,7 +106,7 @@ GameView GvNew(char *pastPlays, Message messages[])
 			newPlayer->health = GAME_START_BLOOD_POINTS;
 		}
 		newPlayer->currLoc = NOWHERE;
-		newPlayer->pastPlays = malloc(sizeof *newPlayer->pastPlays);
+		
 		newPlayer->numTurns = 0;
 		new->players[i] = newPlayer;
 	
@@ -136,20 +133,17 @@ GameView GvNew(char *pastPlays, Message messages[])
 		// take each 6 char play seperately
 		char *str = strtok(tempPastPlays, " ");
 		int i = 0;
-		while (str != NULL) {
+		while (str != NULL) {	
 			// i%5 will determine who made the move
 			int playerId = i%5;
-			int gameRound = i/5;
 			Players *currPlayer = new->players[playerId];
 			
 			// add the 6char string to the players past plays
 			char *tmp = strdup(str);
-			currPlayer->pastPlays[gameRound] = tmp;
+			printf("move = %s\n", tmp);
+			assert(tmp != NULL);
 			currPlayer->numTurns += 1;
 			i+=1;
-
-			showPlayersMoves(currPlayer);
-
 			// if we are processing draculas move
 			if (str[0] == 'D') {
 				ProcessDracula(new, str);
@@ -163,36 +157,20 @@ GameView GvNew(char *pastPlays, Message messages[])
 			// Move onto next person turn
 			str = strtok(NULL, " ");
 			
-			// check if we have reached a new round
-			// Deduct score as appropriate
-			if (i/5 != new->round) {
-				new->round = i/5;
+			if (new->round != i/5) {
+				// we have reached a new round, deduct points
 				new->CurrentScore = new->CurrentScore - SCORE_LOSS_DRACULA_TURN;
-				// Check if vampire has matured
-				if (new->VampireStatus == 1) {
-					if ((new->round - new->RoundOfVampire) == 6) {
-						MatureVampire(new);
-					}
-				}
-				// Check if traps are still in Draculas trail, remove them if they are not
-				int NumRetrunedLocations;
-				bool canFree = true;
-				PlaceId *DraculaTrail = malloc(8*sizeof(PlaceId));
-				DraculaTrail = GvGetLastLocations(new, new->players[PLAYER_DRACULA]->player, 8, &NumRetrunedLocations, &canFree);
-				if (NumRetrunedLocations == 8) {
-					RemoveTrapsFromLoc(DraculaTrail[7], new->map);
-				}
-				free(DraculaTrail);
+				new->round = i/5;
 			}
+
 			new->turnCounter = i;
 		}
 		new->round = i/5;
 		
 	}
-
-	
 	new->pastGamePlays = tempPastPlays;
 	free(tempPastPlays);
+	
 	return new;
 }
 
@@ -200,16 +178,9 @@ void GvFree(GameView gv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	for (int i = 0; i < 5; i++) {
-		printf("freeing %d past turns\n", gv->players[i]->numTurns);
-		for (int h = 0; (h < (gv->players[i]->numTurns)); h++) {
-			printf("freed pastplay[%d]: %s\n", h, gv->players[i]->pastPlays[h]);
-			free(gv->players[i]->pastPlays[h]);
-		}	
-		// free(gv->players[i]->pastPlays);
-		printf("freeing player\n");
 		free(gv->players[i]);
 	}
-	printf("flag\n");
+
 	MapFree(gv->map);
 	
 	free(gv);
@@ -367,6 +338,7 @@ PlaceId CityIdFromMove(char *str) {
 	for (int i = 1; i < 3; i++) {
 		abbrev[i-1] = str[i];
 	}
+	printf("abbreviation = %s\n", abbrev);
 	return placeAbbrevToId(abbrev);
 }
 
@@ -387,7 +359,10 @@ void ProcessDracula(GameView gv, char *move) {
 		bool canFree = true;
 		PlaceId *DraculaTrail = malloc(7*sizeof(PlaceId));
 		DraculaTrail = GvGetLastLocations(gv, Dracula->player, 7, &NumRetrunedLocations, &canFree);
-		currLoc = DraculaTrail[move[2] - '0'];
+		if ((move[2] - '0') < NumRetrunedLocations) {
+			currLoc = DraculaTrail[move[2] - '0'];
+		}
+		
 		free(DraculaTrail);
 	} else if (currLoc == HIDE) {
 		currLoc = Dracula->currLoc;
@@ -401,7 +376,9 @@ void ProcessDracula(GameView gv, char *move) {
 	ActionFromMove(move, action);
 	if (action[0] == 'T') {
 		// Add trap to location
+		printf("adding trap\n");
 		AddTrapToLoc(currLoc, gv->map);
+		printf("added trap to location\n");
 	}
 	if (action[1] == 'V') {
 		// Add vampire to location
@@ -412,6 +389,14 @@ void ProcessDracula(GameView gv, char *move) {
 	}
 	if (action[2] == 'M') {
 		// Remove a trap
+		int NumRetrunedLocations;
+		bool canFree = true;
+		PlaceId *DraculaTrail = malloc(8*sizeof(PlaceId));
+		DraculaTrail = GvGetLastLocations(gv, gv->players[PLAYER_DRACULA]->player, 7, &NumRetrunedLocations, &canFree);
+		if (NumRetrunedLocations == 7) {
+			RemoveTrapsFromLoc(DraculaTrail[6], gv->map);
+		}
+		free(DraculaTrail);
 	} else if (action[2] == 'V') {
 		// Mature Vamp
 		MatureVampire(gv);
@@ -420,11 +405,16 @@ void ProcessDracula(GameView gv, char *move) {
 
 
 void ProcessHunter(GameView gv, char *move, Players *player){
+
 	PlaceId currLoc = CityIdFromMove(move);
 	if (currLoc == player->currLoc) {
 		// the player has rest
 		// increase health
-		player->health = player->health + LIFE_GAIN_REST;
+		if (player->health + LIFE_GAIN_REST > GAME_START_HUNTER_LIFE_POINTS) {
+			player->health = GAME_START_HUNTER_LIFE_POINTS;
+		} else {
+			player->health = player->health + LIFE_GAIN_REST;
+		}	
 	} else {
 		player->currLoc = currLoc;
 	}
@@ -434,10 +424,11 @@ void ProcessHunter(GameView gv, char *move, Players *player){
 		if (action[i] == 'T') {
 			printf("player encountered a trap\n");
 			player->health = player->health - LIFE_LOSS_TRAP_ENCOUNTER;
+			printf("players new health: %d\n", player->health);
 			RemoveTrapFromLoc(currLoc, gv->map);
 		} else if (action[i] == 'V') {
 			// Vanquish vampire
-			RemoveVampireFromLoc(currLoc, gv->map);
+			// RemoveVampireFromLoc(currLoc, gv->map);
 			gv->VampireLocation = NOWHERE;
 			gv->VampireStatus = 1;
 		} else if (action[i] == 'D') {
@@ -452,7 +443,7 @@ void ProcessHunter(GameView gv, char *move, Players *player){
 			player->health = 0;
 			return;
 		}
-	}
+	} 
 }
 
 // Resets the vampire
@@ -464,10 +455,3 @@ void MatureVampire(GameView gv) {
 	gv->RoundOfVampire = -1;
 }
 
-
-void showPlayersMoves(Players *player) {
-	printf("Showing player:%d %d moves\n", player->player, player->numTurns);
-	for (int i = 0; i < player->numTurns; i++) {
-		printf("%s\n", player->pastPlays[i]);
-	}
-}
