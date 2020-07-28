@@ -51,7 +51,7 @@ int main(void)
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
-	/*
+	
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("After Lord Godalming's turn\n");
@@ -352,7 +352,7 @@ int main(void)
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
-	*/
+	
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("Testing move/location history\n");
