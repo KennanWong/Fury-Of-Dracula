@@ -26,28 +26,45 @@ typedef struct{
 	Player player;
 	int health;
 	PlaceId currLoc; 
-	char **pastPlays;
 	int numTurns;
 }Players;
 
 struct hunterView {
 	// TODO: ADD FIELDS HERE
+	GameView gv;
 	Map map;
+	int CurrentScore;
 	Round round;
 	Players **players;
 	Message *messages;
-	int CurrentScore;
 	char *pastGamePlays;
 	int turnCounter;
+	int VampireStatus;		// -> 0 if there is no vampire, 1 if it is immature, 2 if it has matured
+	int RoundOfVampire;
+	PlaceId VampireLocation;
+	PlaceId DraculaLastKNownLoc;
 };
 
-PlaceId CitIdFromMov(char *str); 
+////////////////////////////////////////////////////////////////////////
+// Function declerations
 
-void ActFromMov(char *str, char *action);
+// takes in a 7 char turn string and returns place id of new location
+PlaceId HvCityIdFromMove(char *str); 
 
-void ProcessingDracula(HunterView hv, char *move);
+// take the 7 char turn string and fills in an action string
+void HvActionFromMove(char *str, char *action);
 
-void ProcessingHunter(HunterView hv, char *move, Players *player);
+// Processes Draculas actions
+void HvProcessDracula(HunterView hv, char *move);
+
+
+void HvProcessHunter(HunterView hv, char *move, Players *player);
+
+
+void HvMatureVampire(HunterView hv);
+
+
+PlaceId HunterEncounters(HunterView hv, Players player, Players Dracula);
 
 ////////////////////////////////////////////////////////////////////////
 // Constructor/Destructor
@@ -55,54 +72,22 @@ void ProcessingHunter(HunterView hv, char *move, Players *player);
 HunterView HvNew(char *pastPlays, Message messages[])
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	HunterView new = malloc(sizeof(*new));
-	if (new == NULL) {
-		fprintf(stderr, "Couldn't allocate HunterView!\n");
-		exit(EXIT_FAILURE);
-	}
-	
-	new->map = MapNew();
-	new->round = 0;
-	new->CurrentScore = GAME_START_SCORE;
-	new->players = malloc(4*sizeof(Players));
-	new->turnCounter = 0;
+	HunterView hv = malloc(sizeof(*hv));
+	hv->gv = GvNew(pastPlays, messages);
+	hv->DraculaLastKNownLoc = NOWHERE;
+	// hv->players = malloc(sizeof(Players) * 5);
+	// for (int i = 0; i < 5; i++) {
+	// 	hv->players[i]->
+	// }
 
-	//Initialising all players
-	for(int i = 0; i < 5; i++) {
-		Players *newPlayer = malloc(sizeof(*newPlayer));
-		if(i == 0) newPlayer->player = PLAYER_LORD_GODALMING;
-		else if (i == 1) newPlayer->player = PLAYER_DR_SEWARD;
-		else if (i == 2) newPlayer->player = PLAYER_VAN_HELSING;
-		else if (i == 3) newPlayer->player = PLAYER_MINA_HARKER;
-		else if (i == 4) newPlayer->player = PLAYER_DRACULA;
-		if (i == 4) newPlayer->health = GAME_START_BLOOD_POINTS;
-		else newPlayer->health = GAME_START_HUNTER_LIFE_POINTS;
-		newPlayer->currLoc = NOWHERE;
-		newPlayer->pastPlays = malloc(sizeof *newPlayer->pastPlays);
-		newPlayer->numTurns = 0;
-		new->players[i] = newPlayer;
-	}
 
-	new->messages = messages;
-	return new;
+	return hv;
 }
 
 void HvFree(HunterView hv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	for (int i = 0; i < 5; i++) {
-		printf("freeing %d past turns\n", hv->players[i]->numTurns);
-		for (int h = 0; (h < (hv->players[i]->numTurns)); h++) {
-			printf("freed pastplay[%d]: %s\n", h, hv->players[i]->pastPlays[h]);
-			free(hv->players[i]->pastPlays[h]);
-		}	
-		// free(gv->players[i]->pastPlays);
-		printf("freeing player\n");
-		free(hv->players[i]);
-	}
-	printf("flag\n");
-	MapFree(hv->map);
-	
+	GvFree(hv->gv);
 	free(hv);
 }
 
@@ -112,37 +97,43 @@ void HvFree(HunterView hv)
 Round HvGetRound(HunterView hv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return hv->round;
+	Round roundNum = GvGetRound(hv->gv);
+	return roundNum;
 }
 
 Player HvGetPlayer(HunterView hv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return hv->players[hv->turnCounter%5]->player;
+	Player target= GvGetPlayer(hv->gv);
+	return target;
 }
 
 int HvGetScore(HunterView hv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return hv->CurrentScore;
+	int score = GvGetScore(hv->gv);
+	return score;
 }
 
 int HvGetHealth(HunterView hv, Player player)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return hv->players[player]->health;
+	int TargetHealth = GvGetHealth(hv->gv, player);
+	return TargetHealth;
 }
 
 PlaceId HvGetPlayerLocation(HunterView hv, Player player)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return hv->players[player]->currLoc;
+	PlaceId playerLoc = GvGetPlayerLocation(hv->gv, player);
+	return playerLoc;
 }
 
 PlaceId HvGetVampireLocation(HunterView hv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return NOWHERE;
+	PlaceId vampireLoc = GvGetVampireLocation(hv->gv);
+	return vampireLoc;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -152,13 +143,45 @@ PlaceId HvGetLastKnownDraculaLocation(HunterView hv, Round *round)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	*round = 0;
-	return NOWHERE;
+	PlaceId LastKnown = NOWHERE;
+	// need to find draculas trail, if any of the hunters have been on that path, update last known
+
+	for (int i = 0; i < 4; i++) {
+		int HuNumReturnedLoc;
+		bool HucanFree;
+		PlaceId *HuPastLocs = GvGetLocationHistory(hv->gv, i, &HuNumReturnedLoc, &HucanFree);
+		for (int h = 0; h < HuNumReturnedLoc; h++) {
+			int DnumReturnedLoc;
+			bool canFree;
+			PlaceId *DrculasTrail = ReturnTrailAtRound(hv->gv, h, &DnumReturnedLoc, &canFree);
+			for (int l = 0; l < DnumReturnedLoc; l++){
+				if (HuPastLocs[h] == DrculasTrail[l]) {
+					if (*round < h) {
+						*round = h;
+						LastKnown = HuPastLocs[h];
+					}		
+				}
+			}
+			if (canFree) {
+				free(DrculasTrail);
+			}		
+		}
+	}
+	printf("lastknowLocation =  %d\n", LastKnown);
+	return LastKnown;
 }
 
 PlaceId *HvGetShortestPathTo(HunterView hv, Player hunter, PlaceId dest,
                              int *pathLength)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	// breadth first search
+	// dijkstras algo
+	// find all locations that can be immediately reached by te player, add them toq ueue
+	// keep track of distrance from src
+	// once we have found the destination, return
+
+	
 	*pathLength = 0;
 	return NULL;
 }
@@ -200,31 +223,135 @@ PlaceId *HvWhereCanTheyGoByType(HunterView hv, Player player,
 
 ////////////////////////////////////////////////////////////////////////
 // Your own interface functions
-PlaceId CitIdFromMov(char *str) {
-	char abbrev[2];
-	for (int i = 1; i < 3; i++) {
-		abbrev[i-1] = str[i];
-	}
-	return placeAbbrevToId(abbrev);
+
+PlaceId HvCityIdFromMove(char *str) {
+	char *abbrev = malloc(sizeof(*abbrev));
+	abbrev[0] = str[1];
+	abbrev[1] = str[2];
+	PlaceId id = placeAbbrevToId(abbrev);
+	free(abbrev);
+	return id;
 }
 
-void ActFromMov(char *str, char *action) {
+void HvActionFromMove(char *str, char *action) {
 	for (int i = 3; i < 7; i++) {
 		action[i - 3] = str[i];
 	}
 }
 
-void ProcessingDracula(HunterView hv, char *move) {
+void HvProcessDracula(HunterView hv, char *move) {
 	// Process movement
 	Players *Dracula = hv->players[PLAYER_DRACULA];
-	PlaceId currLoc = CitIdFromMov(move);
+	PlaceId currLoc = HvCityIdFromMove(move);
+	if (move[1] == 'D') {
+		/*
+		// Dracula has double backed
+		// need to get list of previous locations
+		int NumRetrunedLocations;
+		bool canFree = true;
+		PlaceId *DraculaTrail = malloc(7*sizeof(PlaceId));
+		DraculaTrail = HvGetLastLocations(hv, Dracula->player, 7, &NumRetrunedLocations, &canFree);
+		if ((move[2] - '0') < NumRetrunedLocations) {
+			currLoc = DraculaTrail[move[2] - '0'];
+		}
+		
+		free(DraculaTrail);
+		*/
+	} else if (currLoc == HIDE) {
+		currLoc = Dracula->currLoc;
+	} else if (placeIdToType(currLoc) == SEA) {
+		hv->players[PLAYER_DRACULA]->health = hv->players[PLAYER_DRACULA]->health - LIFE_LOSS_SEA;
+	}
 	Dracula->currLoc = currLoc;
+
+	// Process action
+	char action[4];
+	HvActionFromMove(move, action);
+	if (action[0] == 'T') {
+		// Add trap to location
+		//printf("adding trap\n");
+		AddTrapToLoc(currLoc, hv->map);
+		//printf("added trap to location\n");
+	}
+	if (action[1] == 'V') {
+		// Add vampire to location
+		AddVampireToLoc(currLoc, hv->map);
+		hv->VampireStatus = 1;
+		hv->VampireLocation = currLoc;
+		hv->RoundOfVampire = hv->round;
+	}
+	if (action[2] == 'M') {
+		// Remove a trap
+		/*
+		int NumRetrunedLocations;
+		bool canFree = true;
+		PlaceId *DraculaTrail = malloc(8*sizeof(PlaceId));
+		DraculaTrail = GvGetLastLocations(hv, hv->players[PLAYER_DRACULA]->player, 7, &NumRetrunedLocations, &canFree);
+		if (NumRetrunedLocations == 7) {
+			RemoveTrapsFromLoc(DraculaTrail[6], hv->map);
+		}
+		free(DraculaTrail);
+		*/
+	} else if (action[2] == 'V') {
+		// Mature Vamp
+		HvMatureVampire(hv);
+	}
 }
 
 
-void ProcessingHunter(HunterView hv, char *move, Players *player){
+void HvProcessHunter(HunterView hv, char *move, Players *player){
 
-	PlaceId currLoc = CitIdFromMov(move);
-	player->currLoc = currLoc;
+	PlaceId currLoc = CityIdFromMove(move);
+	if (currLoc == player->currLoc) {
+		// the player has rest
+		// increase health
+		if (player->health + LIFE_GAIN_REST > GAME_START_HUNTER_LIFE_POINTS) {
+			player->health = GAME_START_HUNTER_LIFE_POINTS;
+		} else {
+			player->health = player->health + LIFE_GAIN_REST;
+		}	
+	} else {
+		player->currLoc = currLoc;
+	}
+	char action[4];
+	HvActionFromMove(move, action);
+	for (int i = 0; i < 4; i++) {
+		if (action[i] == 'T') {
+			// printf("player encountered a trap\n");
+			player->health = player->health - LIFE_LOSS_TRAP_ENCOUNTER;
+			// printf("players new health: %d\n", player->health);
+			RemoveTrapFromLoc(currLoc, hv->map);
+		} else if (action[i] == 'V') {
+			// Vanquish vampire
+			// RemoveVampireFromLoc(currLoc, gv->map);
+			hv->VampireLocation = NOWHERE;
+			hv->VampireStatus = 1;
+		} else if (action[i] == 'D') {
+			// Hunter encounters dracula, loses life points
+			player->health = player->health - LIFE_LOSS_DRACULA_ENCOUNTER;
+			// Dracula encounters hunter, loses blood points
+			hv->players[PLAYER_DRACULA]->health = hv->players[PLAYER_DRACULA]->health - LIFE_LOSS_HUNTER_ENCOUNTER;
+			// Set draculas last known location
+			hv->DraculaLastKNownLoc = player->currLoc;
+		}
+		if (player->health <= 0) {
+			// the hunter has died, and will need to telelport to hospital
+			player->currLoc = ST_JOSEPH_AND_ST_MARY;
+			player->health = 0;
+			return;
+		}
+	} 
 }
-// TODO
+
+// Resets the vampire
+void HvMatureVampire(HunterView hv) {
+	RemoveVampireFromLoc(hv->VampireLocation, hv->map);
+	hv->CurrentScore = hv->CurrentScore - SCORE_LOSS_VAMPIRE_MATURES;
+	hv->VampireLocation = NOWHERE;
+	hv->VampireStatus = 10;
+	hv->RoundOfVampire = -1;
+}
+
+PlaceId HunterEncounters(HunterView hv, Players player, Players Dracula) {
+	return NOWHERE;
+}

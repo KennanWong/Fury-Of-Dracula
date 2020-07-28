@@ -389,6 +389,8 @@ PlaceId CityIdFromMove(char *str) {
 	abbrev[0] = str[1];
 	abbrev[1] = str[2];
 	PlaceId id = placeAbbrevToId(abbrev);
+	printf("abbrev = %s\n", abbrev);
+	assert(strlen(abbrev) == 2);
 	free(abbrev);
 	return id;
 }
@@ -504,4 +506,30 @@ void MatureVampire(GameView gv) {
 	gv->VampireLocation = NOWHERE;
 	gv->VampireStatus = 10;
 	gv->RoundOfVampire = -1;
+}
+
+
+
+// From a given round number, return trail array
+PlaceId *ReturnTrailAtRound(GameView gv, Round round, int *DcNumReturnedLoc, bool *canFree) {
+	PlaceId *DraculasTrail = GvGetLocationHistory(gv, PLAYER_DRACULA, DcNumReturnedLoc,  canFree);
+	PlaceId *ReturnedTrailArray = malloc(sizeof(*ReturnedTrailArray));
+	
+	// if DnumReturnedLoc < round num, then we can only take up to DnumReturnedLoc
+	// also if roundNum > 6; we can only take the first six
+
+	if (*DcNumReturnedLoc < 6) {
+		for (int i = 0; i < *DcNumReturnedLoc; i++) {
+			ReturnedTrailArray[i] = DraculasTrail[i];
+		}	
+	} else {
+		for (int i = 0; (round - 6 + i) < round; i++) {
+			ReturnedTrailArray[i] = DraculasTrail[round- 6 + i];
+		}
+		*DcNumReturnedLoc = 6;
+	}
+	if (canFree) {
+		free(DraculasTrail);
+	}
+	return ReturnedTrailArray;
 }
