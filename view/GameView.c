@@ -125,7 +125,6 @@ GameView GvNew(char *pastPlays, Message messages[])
 		this must be split as it weill be different for hunters and the dracula
 	3. move onto the next player
 	4. once we process one entire round, update round counter, and deduct points accordingly
-
 	*/
 	// Processing the moves of each player
 	char *tempPastPlays = strdup(pastPlays);
@@ -461,4 +460,3 @@ void MatureVampire(GameView gv) {
 	gv->VampireStatus = 10;
 	gv->RoundOfVampire = -1;
 }
-

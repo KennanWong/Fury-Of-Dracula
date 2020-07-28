@@ -82,35 +82,8 @@ HunterView HvNew(char *pastPlays, Message messages[])
 		newPlayer->numTurns = 0;
 		new->players[i] = newPlayer;
 	}
-	
-	char *tempPastPlays = strdup(pastPlays);
-	if(strlen(pastPlays) != 0) {
-		char *str = strtok(tempPastPlays, " ");
-		int i = 0;
-		while(str != NULL) {
-			int playerId = i%5;
-			Players *currPlayer = new->players[playerId];
-			
-			// add the 6char string to the players past plays
-			char *tmp = strdup(str);
-			printf("move = %s\n", tmp);
-			assert(tmp != NULL);
-			currPlayer->numTurns += 1;
-			i+=1;
-			str = strtok(NULL, " ");
-			if (new->round != i/5) {
-				// we have reached a new round, deduct points
-				new->CurrentScore = new->CurrentScore - SCORE_LOSS_DRACULA_TURN;
-				new->round = i/5;
-			}
 
-			new->turnCounter = i;
-		}
-		new->round = i/5;
-	}
 	new->messages = messages;
-	new->pastGamePlays = tempPastPlays;
-	free(tempPastPlays);
 	return new;
 }
 
@@ -118,13 +91,18 @@ void HvFree(HunterView hv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	for (int i = 0; i < 5; i++) {
+		printf("freeing %d past turns\n", hv->players[i]->numTurns);
 		for (int h = 0; (h < (hv->players[i]->numTurns)); h++) {
+			printf("freed pastplay[%d]: %s\n", h, hv->players[i]->pastPlays[h]);
 			free(hv->players[i]->pastPlays[h]);
 		}	
 		// free(gv->players[i]->pastPlays);
+		printf("freeing player\n");
 		free(hv->players[i]);
 	}
+	printf("flag\n");
 	MapFree(hv->map);
+	
 	free(hv);
 }
 

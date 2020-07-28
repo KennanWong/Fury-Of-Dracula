@@ -39,7 +39,7 @@ int main(void)
 		assert(HvGetHealth(hv, PLAYER_LORD_GODALMING) == GAME_START_HUNTER_LIFE_POINTS);
 		assert(HvGetHealth(hv, PLAYER_DRACULA) == GAME_START_BLOOD_POINTS);
 		assert(HvGetVampireLocation(hv) == NOWHERE);
-
+		
 		HvFree(hv);
 		printf("Test passed\n");
 	}
