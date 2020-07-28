@@ -308,14 +308,12 @@ PlaceId *GvGetReachableByType(GameView gv, Player player, Round round,
 // TODO
 
 PlaceId CityIdFromMove(char *str) {
-	char abbrev[2];
-	for (int i = 1; i < 3; i++) {
-		abbrev[i-1] = str[i];
-	}
-	printf("strlen abbrev = %ld\n", strlen(abbrev));
-	printf("abbreviation = %s\n", abbrev);
-	printf("placeId = %d\n", placeAbbrevToId(abbrev));
-	return placeAbbrevToId(abbrev);
+	char *abbrev = malloc(sizeof(*abbrev));
+	abbrev[0] = str[1];
+	abbrev[1] = str[2];
+	PlaceId id = placeAbbrevToId(abbrev);
+	free(abbrev);
+	return id;
 }
 
 void ActionFromMove(char *str, char *action) {
