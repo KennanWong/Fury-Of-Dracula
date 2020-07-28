@@ -249,9 +249,53 @@ PlaceId *GvGetMoveHistory(GameView gv, Player player,
                           int *numReturnedMoves, bool *canFree)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numReturnedMoves = 0;
+	printf("Start of GvGetMoveHistory function\n");
+	PlaceId *GGMH = malloc(gv->round*sizeof(PlaceId));
+	int pInitial = 0;
+	if(player == 0) pInitial = 'G';
+	else if(player == 1) pInitial = 'S';
+	else if(player == 2) pInitial = 'H';
+	else if(player == 3) pInitial = 'M';
+	else if(player == 4) pInitial = 'D';
+	assert(pInitial != 0);
+	printf("pInitial is %d\n",pInitial);
+	printf("tempPastPlays is %s\n",gv->pastGamePlays);
+	int n = 0;
+	char *str = strtok(gv->pastGamePlays," ");
+	while(str != NULL) {
+		if(str[0] == pInitial) {
+			char placeAbbrev[2];
+			placeAbbrev[0] = str[1];
+			placeAbbrev[1] = str[2]; 
+			//If the given abbrev is city move (unknown city)
+			if(placeAbbrev[0] == 'C' && placeAbbrev[1] == '?') GGMH[n] = CITY_UNKNOWN;
+
+			//If the given abbrev is sea move (unknown sea)
+			else if(placeAbbrev[0] == 'S' && placeAbbrev[1] == '?') GGMH[n] = SEA_UNKNOWN;
+
+			//If the given abbrev is Dn
+			else if(placeAbbrev[0] == 'D' && placeAbbrev[1] != 'U') {
+				if(placeAbbrev[1] == 49) GGMH[n] = DOUBLE_BACK_1;
+				else if(placeAbbrev[1] == 50) GGMH[n] = DOUBLE_BACK_2;
+				else if(placeAbbrev[1] == 51) GGMH[n] = DOUBLE_BACK_3;
+				else if(placeAbbrev[1] == 52) GGMH[n] = DOUBLE_BACK_4;
+				else if(placeAbbrev[1] == 53) GGMH[n] = DOUBLE_BACK_5;
+			}
+
+			//If the given abbrev is HI
+			else if(placeAbbrev[0] == 'H' && placeAbbrev[1] == 'I') {
+				GGMH[n] = HIDE;
+			}
+			else GGMH[n] = placeAbbrevToId(placeAbbrev);
+			n++;
+		} else str = strtok(NULL," ");
+		
+	}
+	*numReturnedMoves = gv->players[player]->numTurns;
 	*canFree = false;
-	return NULL;
+	printf("move[0] is %d\n", GGMH[0]);
+	printf("n is %d\n",n);
+	return GGMH;
 }
 
 PlaceId *GvGetLastMoves(GameView gv, Player player, int numMoves,
@@ -341,11 +385,12 @@ PlaceId *GvGetReachableByType(GameView gv, Player player, Round round,
 // TODO
 
 PlaceId CityIdFromMove(char *str) {
-	char abbrev[2];
-	for (int i = 1; i < 3; i++) {
-		abbrev[i-1] = str[i];
-	}
-	return placeAbbrevToId(abbrev);
+	char *abbrev = malloc(sizeof(*abbrev));
+	abbrev[0] = str[1];
+	abbrev[1] = str[2];
+	PlaceId id = placeAbbrevToId(abbrev);
+	free(abbrev);
+	return id;
 }
 
 void ActionFromMove(char *str, char *action) {
