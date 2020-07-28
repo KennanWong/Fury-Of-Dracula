@@ -140,7 +140,7 @@ GameView GvNew(char *pastPlays, Message messages[])
 			
 			// add the 6char string to the players past plays
 			char *tmp = strdup(str);
-			printf("move = %s\n", tmp);
+			// printf("move = %s\n", tmp);
 			assert(tmp != NULL);
 			currPlayer->numTurns += 1;
 			i+=1;
@@ -169,7 +169,7 @@ GameView GvNew(char *pastPlays, Message messages[])
 		
 	}
 	new->pastGamePlays = tempPastPlays;
-	free(tempPastPlays);
+	// free(tempPastPlays);
 	
 	return new;
 }
@@ -180,7 +180,7 @@ void GvFree(GameView gv)
 	for (int i = 0; i < 5; i++) {
 		free(gv->players[i]);
 	}
-
+	free(gv->pastGamePlays);
 	MapFree(gv->map);
 	
 	free(gv);
@@ -350,9 +350,9 @@ void ProcessDracula(GameView gv, char *move) {
 	ActionFromMove(move, action);
 	if (action[0] == 'T') {
 		// Add trap to location
-		printf("adding trap\n");
+		//printf("adding trap\n");
 		AddTrapToLoc(currLoc, gv->map);
-		printf("added trap to location\n");
+		//printf("added trap to location\n");
 	}
 	if (action[1] == 'V') {
 		// Add vampire to location
@@ -396,9 +396,9 @@ void ProcessHunter(GameView gv, char *move, Players *player){
 	ActionFromMove(move, action);
 	for (int i = 0; i < 4; i++) {
 		if (action[i] == 'T') {
-			printf("player encountered a trap\n");
+			// printf("player encountered a trap\n");
 			player->health = player->health - LIFE_LOSS_TRAP_ENCOUNTER;
-			printf("players new health: %d\n", player->health);
+			// printf("players new health: %d\n", player->health);
 			RemoveTrapFromLoc(currLoc, gv->map);
 		} else if (action[i] == 'V') {
 			// Vanquish vampire
