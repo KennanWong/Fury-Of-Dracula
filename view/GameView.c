@@ -395,7 +395,8 @@ PlaceId *GvGetLastLocations(GameView gv, Player player, int numLocs,
                             int *numReturnedLocs, bool *canFree)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	/*PlaceId *GGLL = malloc(gv->players[player]->numTurns*sizeof(PlaceId));
+	/*
+	PlaceId *GGLL = malloc(gv->players[player]->numTurns*sizeof(PlaceId));
 	int start = gv->players[player]->numTurns - numLocs;
 	printf("numMoves is %d\n",gv->players[player]->numTurns);
 	printf("numLocs is %d\n",numLocs);
@@ -414,11 +415,19 @@ PlaceId *GvGetLastLocations(GameView gv, Player player, int numLocs,
 	printf("count is %d\n", count);
 	*numReturnedLocs = count;
 	*canFree = false;
+	
+	printf("%d\n", GGLL[0]);
+	printf("%d\n", GGLL[1]);
+	printf("%d\n", GGLL[2]);
+	printf("%d\n", GGLL[3]);
+	
 	return GGLL;
 	*/
+	
 	*numReturnedLocs = 0;
 	*canFree = false;
 	return NULL;
+	
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -502,14 +511,14 @@ void ProcessDracula(GameView gv, char *move) {
 	}
 	if (action[2] == 'M') {
 		// Remove a trap
-		int NumRetrunedLocations;
+		/*int NumRetrunedLocations;
 		bool canFree = true;
 		PlaceId *DraculaTrail = malloc(8*sizeof(PlaceId));
 		DraculaTrail = GvGetLastLocations(gv, gv->players[PLAYER_DRACULA]->player, 7, &NumRetrunedLocations, &canFree);
 		if (NumRetrunedLocations == 7) {
 			RemoveTrapsFromLoc(DraculaTrail[6], gv->map);
 		}
-		free(DraculaTrail);
+		free(DraculaTrail);*/
 	} else if (action[2] == 'V') {
 		// Mature Vamp
 		MatureVampire(gv);
