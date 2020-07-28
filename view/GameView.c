@@ -253,7 +253,7 @@ PlaceId *GvGetMoveHistory(GameView gv, Player player,
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	//printf("\nStart of GvGetMoveHistory function\n");
-	PlaceId *GGMH = malloc(gv->round*sizeof(PlaceId));
+	PlaceId *GGMH = malloc(gv->players[player]->numTurns*sizeof(PlaceId));
 	int pInitial = 0;
 	if(player == 0) pInitial = 'G';
 	else if(player == 1) pInitial = 'S';
@@ -298,6 +298,7 @@ PlaceId *GvGetMoveHistory(GameView gv, Player player,
 		str = strtok(NULL," ");
 		
 	}
+	printf("NumTurn is %d\n",gv->players[player]->numTurns);
 	*numReturnedMoves = gv->players[player]->numTurns;
 	*canFree = false;
 	free(tempPastPlays);
@@ -320,10 +321,14 @@ PlaceId *GvGetLastMoves(GameView gv, Player player, int numMoves,
 		start = 0;
 		end = gv->players[player]->numTurns;
 	}
-	PlaceId *temp = GvGetLocationHistory(gv,player,numReturnedMoves,canFree);
-	for(int counter = 0; counter < end; counter++) {
-		GGLM[counter] = temp[counter + start];
+	PlaceId *temp = GvGetMoveHistory(gv,player,numReturnedMoves,canFree);
+	int count = 0;
+	while(count < end) {
+		GGLM[count] = temp[count + start];
+		count++;
 	}
+	*numReturnedMoves = count;
+	*canFree = false;
 	return GGLM;
 }
 
@@ -331,7 +336,7 @@ PlaceId *GvGetLocationHistory(GameView gv, Player player,
                               int *numReturnedLocs, bool *canFree)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	PlaceId *GGLH = malloc(gv->round*sizeof(PlaceId));
+	PlaceId *GGLH = malloc(gv->players[player]->numTurns*sizeof(PlaceId));
 	int pInitial = 0;
 	if(player == 0) pInitial = 'G';
 	else if(player == 1) pInitial = 'S';
@@ -390,9 +395,30 @@ PlaceId *GvGetLastLocations(GameView gv, Player player, int numLocs,
                             int *numReturnedLocs, bool *canFree)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	/*PlaceId *GGLL = malloc(gv->players[player]->numTurns*sizeof(PlaceId));
+	int start = gv->players[player]->numTurns - numLocs;
+	printf("numMoves is %d\n",gv->players[player]->numTurns);
+	printf("numLocs is %d\n",numLocs);
+	printf("start is %d\n", start);
+	int end = numLocs;
+	if(start < 0) {
+		start = 0;
+		end = gv->players[player]->numTurns;
+	}
+	PlaceId *temp = GvGetLocationHistory(gv,player,numReturnedLocs,canFree);
+	int count = 0;
+	while(count < end) {
+		GGLL[count] = temp[count + start];
+		count++;
+	}
+	printf("count is %d\n", count);
+	*numReturnedLocs = count;
+	*canFree = false;
+	return GGLL;
+	*/
 	*numReturnedLocs = 0;
 	*canFree = false;
-	return 0;
+	return NULL;
 }
 
 ////////////////////////////////////////////////////////////////////////
