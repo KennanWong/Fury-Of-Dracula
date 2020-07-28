@@ -192,24 +192,144 @@ PlaceId *HvGetShortestPathTo(HunterView hv, Player hunter, PlaceId dest,
 PlaceId *HvWhereCanIGo(HunterView hv, int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numReturnedLocs = 0;
-	return NULL;
+	PlaceId *HWCIG = malloc(hv->round*sizeof(PlaceId));
+	char *tempPastPlays = strdup(hv->pastGamePlays);
+
+	//Calculating the player we are right now
+	char *str = strtok(tempPastPlays, " ");
+	
+	int i = 0;
+	int playerId;
+	while (str != NULL) {
+		playerId = i%5;
+		str = strtok(NULL, " ");
+		i++;
+	}
+	playerId = i%5;
+
+	//Defining the current location of the player given as CurrCityId
+	PlaceId CurrCityId = hv->players[playerId]->currLoc;
+
+	//If the player is currently NOWHERE i.e hasn't made a move, return NULL
+	if(CurrCityId == NOWHERE) {
+		*numReturnedLocs = 0;
+		return NULL;
+	}
+
+	//Using MapGetConnection which gives a linked list of all the connections to that city
+	ConnList List = MapGetConnections(hv->map, CurrCityId);
+
+	//Transferring all of the places in List into HWCIG
+	int m = 0;
+	while(List != NULL) {
+		HWCIG[m] = List->p;
+		List = List->next;
+		m++;
+	}
+
+	*numReturnedLocs = m;
+	return HWCIG;
 }
 
 PlaceId *HvWhereCanIGoByType(HunterView hv, bool road, bool rail,
                              bool boat, int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numReturnedLocs = 0;
-	return NULL;
+	PlaceId *HWCIGBT = malloc(hv->round*sizeof(PlaceId));
+	char *tempPastPlays = strdup(hv->pastGamePlays);
+
+	//Calculating the player we are right now
+	char *str = strtok(tempPastPlays, " ");
+	
+	int i = 0;
+	int playerId;
+	while (str != NULL) {
+		playerId = i%5;
+		str = strtok(NULL, " ");
+		i++;
+	}
+	playerId = i%5;
+
+	//Defining the current location of the player given as CurrCityId
+	PlaceId CurrCityId = hv->players[playerId]->currLoc;
+
+	//If the player is currently NOWHERE i.e hasn't made a move, return NULL
+	if(CurrCityId == NOWHERE) {
+		*numReturnedLocs = 0;
+		return NULL;
+	}
+
+	//Using MapGetConnection which gives a linked list of all the connections to that city
+	ConnList List = MapGetConnections(hv->map, CurrCityId);
+
+	//Checking which type of transport are not allowed
+
+	
+	//Transferring all of the places in List into HWCIGBT
+	int m = 0;
+	while(List != NULL) {
+		//Checking if the place type is possible
+		int possible = 0;
+		while(possible != 1) {
+			//If any of the 3 transport types is false, you can only break the loop
+			//by having a placeId that is not that transport type
+			if(road == false) {
+				if(placeIdToType(List->p) == ROAD) {
+					List = List->next;
+				} else possible = 1;
+			}
+			if(rail == false) {
+				if(placeIdToType(List->p) == RAIL) {
+					List = List->next;
+				} else possible = 1;
+			}
+			if(boat == false) {
+				if(placeIdToType(List->p) == BOAT) {
+					List = List->next;
+				} else possible = 1;
+			}
+			//If all transport types are true, break out of loop
+			if(road == true && rail == true && boat == true) {
+				possible = 1;
+			}
+		}
+		HWCIGBT[m] = List->p;
+		List = List->next;
+		m++;
+	}
+
+	*numReturnedLocs = m;
+	return HWCIGBT;
 }
 
 PlaceId *HvWhereCanTheyGo(HunterView hv, Player player,
                           int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numReturnedLocs = 0;
-	return NULL;
+	PlaceId *HWCTG = malloc(hv->round*sizeof(PlaceId));
+
+	//Defining the current location of the player given as CurrCityId
+	PlaceId CurrCityId = hv->players[player]->currLoc;
+
+	//If the player is currently NOWHERE i.e hasn't made a move, return NULL
+	if(CurrCityId == NOWHERE) {
+		*numReturnedLocs = 0;
+		return NULL;
+	}
+
+	//Using MapGetConnection which gives a linked list of all the connections to that city
+	ConnList List = MapGetConnections(hv->map, CurrCityId);
+
+	//Transferring all of the places in List into HWCTG
+	int m = 0;
+	while(List != NULL) {
+		HWCTG[m] = List->p;
+		List = List->next;
+		m++;
+	}
+
+	*numReturnedLocs = m;
+	return HWCTG;
 }
 
 PlaceId *HvWhereCanTheyGoByType(HunterView hv, Player player,
@@ -217,8 +337,58 @@ PlaceId *HvWhereCanTheyGoByType(HunterView hv, Player player,
                                 int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numReturnedLocs = 0;
-	return NULL;
+	PlaceId *HWCTGBT = malloc(hv->round*sizeof(PlaceId));
+
+	//Defining the current location of the player given as CurrCityId
+	PlaceId CurrCityId = hv->players[player]->currLoc;
+
+	//If the player is currently NOWHERE i.e hasn't made a move, return NULL
+	if(CurrCityId == NOWHERE) {
+		*numReturnedLocs = 0;
+		return NULL;
+	}
+
+	//Using MapGetConnection which gives a linked list of all the connections to that city
+	ConnList List = MapGetConnections(hv->map, CurrCityId);
+
+	//Checking which type of transport are not allowed
+
+	
+	//Transferring all of the places in List into HWCIGBT
+	int m = 0;
+	while(List != NULL) {
+		//Checking if the place type is possible
+		int possible = 0;
+		while(possible != 1) {
+			//If any of the 3 transport types is false, you can only break the loop
+			//by having a placeId that is not that transport type
+			if(road == false) {
+				if(placeIdToType(List->p) == ROAD) {
+					List = List->next;
+				} else possible = 1;
+			}
+			if(rail == false) {
+				if(placeIdToType(List->p) == RAIL) {
+					List = List->next;
+				} else possible = 1;
+			}
+			if(boat == false) {
+				if(placeIdToType(List->p) == BOAT) {
+					List = List->next;
+				} else possible = 1;
+			}
+			//If all transport types are true, break out of loop
+			if(road == true && rail == true && boat == true) {
+				possible = 1;
+			}
+		}
+		HWCTGBT[m] = List->p;
+		List = List->next;
+		m++;
+	}
+
+	*numReturnedLocs = m;
+	return HWCTGBT;
 }
 
 ////////////////////////////////////////////////////////////////////////
