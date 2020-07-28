@@ -85,7 +85,7 @@ GameView GvNew(char *pastPlays, Message messages[])
 	new->VampireLocation = NOWHERE;
 	new->VampireStatus = 0;
 	new->RoundOfVampire = -1;
-
+	printf("%s",pastPlays);
 	// intialise the players
 	for (int i = 0; i < 5; i++){
 		Players *newPlayer = malloc(sizeof(Players));
@@ -128,6 +128,9 @@ GameView GvNew(char *pastPlays, Message messages[])
 	*/
 	// Processing the moves of each player
 	char *tempPastPlays = strdup(pastPlays);
+	char *saveGamePlays = strdup(pastPlays);
+	assert(tempPastPlays != saveGamePlays);
+	new->pastGamePlays = saveGamePlays;
 	if (strlen(pastPlays) != 0) {
 		// take each 6 char play seperately
 		char *str = strtok(tempPastPlays, " ");
@@ -167,8 +170,8 @@ GameView GvNew(char *pastPlays, Message messages[])
 		new->round = i/5;
 		
 	}
-	new->pastGamePlays = tempPastPlays;
-	// free(tempPastPlays);
+	new->pastGamePlays = saveGamePlays;
+	free(tempPastPlays);
 	
 	return new;
 }
@@ -249,7 +252,7 @@ PlaceId *GvGetMoveHistory(GameView gv, Player player,
                           int *numReturnedMoves, bool *canFree)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	printf("Start of GvGetMoveHistory function\n");
+	//printf("\nStart of GvGetMoveHistory function\n");
 	PlaceId *GGMH = malloc(gv->round*sizeof(PlaceId));
 	int pInitial = 0;
 	if(player == 0) pInitial = 'G';
@@ -258,10 +261,11 @@ PlaceId *GvGetMoveHistory(GameView gv, Player player,
 	else if(player == 3) pInitial = 'M';
 	else if(player == 4) pInitial = 'D';
 	assert(pInitial != 0);
-	printf("pInitial is %d\n",pInitial);
-	printf("tempPastPlays is %s\n",gv->pastGamePlays);
+	//printf("pInitial is %d\n",pInitial);
+	//printf("gv->pastGamePlays is %s\n",gv->pastGamePlays);
+	char *tempPastPlays = strdup(gv->pastGamePlays);
 	int n = 0;
-	char *str = strtok(gv->pastGamePlays," ");
+	char *str = strtok(tempPastPlays," ");
 	while(str != NULL) {
 		if(str[0] == pInitial) {
 			char placeAbbrev[2];
@@ -286,15 +290,19 @@ PlaceId *GvGetMoveHistory(GameView gv, Player player,
 			else if(placeAbbrev[0] == 'H' && placeAbbrev[1] == 'I') {
 				GGMH[n] = HIDE;
 			}
-			else GGMH[n] = placeAbbrevToId(placeAbbrev);
+			else {
+				GGMH[n] = CityIdFromMove(str);
+			}
 			n++;
-		} else str = strtok(NULL," ");
+		}
+		str = strtok(NULL," ");
 		
 	}
 	*numReturnedMoves = gv->players[player]->numTurns;
 	*canFree = false;
-	printf("move[0] is %d\n", GGMH[0]);
-	printf("n is %d\n",n);
+	free(tempPastPlays);
+	//printf("move[0] is %d\n", GGMH[0]);
+	//printf("n is %d\n",n);
 	return GGMH;
 }
 
@@ -302,52 +310,80 @@ PlaceId *GvGetLastMoves(GameView gv, Player player, int numMoves,
                         int *numReturnedMoves, bool *canFree)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numReturnedMoves = 0;
-	*canFree = false;
-	return NULL;
+	PlaceId *GGLM = malloc(gv->players[player]->numTurns*sizeof(PlaceId));
+	int start = gv->players[player]->numTurns - numMoves;
+	printf("numMoves is %d\n",gv->players[player]->numTurns);
+	printf("numLocs is %d\n",numMoves);
+	printf("start is %d\n", start);
+	int end = numMoves;
+	if(start < 0) {
+		start = 0;
+		end = gv->players[player]->numTurns;
+	}
+	PlaceId *temp = GvGetLocationHistory(gv,player,numReturnedMoves,canFree);
+	for(int counter = 0; counter < end; counter++) {
+		GGLM[counter] = temp[counter + start];
+	}
+	return GGLM;
 }
 
 PlaceId *GvGetLocationHistory(GameView gv, Player player,
                               int *numReturnedLocs, bool *canFree)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	PlaceId *target = malloc(gv->round*sizeof(PlaceId));
+	PlaceId *GGLH = malloc(gv->round*sizeof(PlaceId));
 	int pInitial = 0;
 	if(player == 0) pInitial = 'G';
 	else if(player == 1) pInitial = 'S';
 	else if(player == 2) pInitial = 'H';
 	else if(player == 3) pInitial = 'M';
 	else if(player == 4) pInitial = 'D';
+	assert(pInitial != 0);
+	//printf("pInitial is %d\n",pInitial);
+	//printf("gv->pastGamePlays is %s\n",gv->pastGamePlays);
+	char *tempPastPlays = strdup(gv->pastGamePlays);
 	int n = 0;
-	char *str = strtok(gv->pastGamePlays," ");
-	if(str[0] == pInitial) {
-		char placeAbbrev[2];
-		placeAbbrev[0] = str[1];
-		placeAbbrev[1] = str[2]; 
-		//If the given abbrev is city move (unknown city)
-		if(placeAbbrev[0] == 'C' && placeAbbrev[1] == '?') target[n] = CITY_UNKNOWN;
+	char *str = strtok(tempPastPlays," ");
+	if(pInitial == 'D') {
+		while(str != NULL) {
+			if(str[0] == pInitial) {
+				char placeAbbrev[2];
+				placeAbbrev[0] = str[1];
+				placeAbbrev[1] = str[2]; 
+				//If the given abbrev is city move (unknown city)
+				if(placeAbbrev[0] == 'C' && placeAbbrev[1] == '?') GGLH[n] = CITY_UNKNOWN;
 
-		//If the given abbrev is sea move (unknown sea)
-		else if(placeAbbrev[0] == 'S' && placeAbbrev[1] == '?') target[n] = SEA_UNKNOWN;
+				//If the given abbrev is sea move (unknown sea)
+				else if(placeAbbrev[0] == 'S' && placeAbbrev[1] == '?') GGLH[n] = SEA_UNKNOWN;
 
-		//If the given abbrev is Dn
-		else if(placeAbbrev[0] == 'D' && placeAbbrev[1] != 'U') {
-			if(placeAbbrev[1] == 49) target[n] = target[n-1];
-			else if(placeAbbrev[1] == 50) target[n] = target[n-2];
-			else if(placeAbbrev[1] == 51) target[n] = target[n-3];
-			else if(placeAbbrev[1] == 52) target[n] = target[n-4];
-			else if(placeAbbrev[1] == 53) target[n] = target[n-5];
+				//If the given abbrev is Dn
+				else if(placeAbbrev[0] == 'D' && placeAbbrev[1] != 'U') {
+					if(placeAbbrev[1] == 49) GGLH[n] = GGLH[n-1];
+					else if(placeAbbrev[1] == 50) GGLH[n] = GGLH[n-2];
+					else if(placeAbbrev[1] == 51) GGLH[n] = GGLH[n-3];
+					else if(placeAbbrev[1] == 52) GGLH[n] = GGLH[n-4];
+					else if(placeAbbrev[1] == 53) GGLH[n] = GGLH[n-5];
+				}
+
+				//If the given abbrev is HI
+				else if(placeAbbrev[0] == 'H' && placeAbbrev[1] == 'I') {
+					GGLH[n] = GGLH[n-1];
+				}
+				else {
+					GGLH[n] = CityIdFromMove(str);
+				}
+				n++;
+			}
+			str = strtok(NULL," ");
+			
 		}
-
-		//If the given abbrev is HI
-		else if(placeAbbrev[0] == 'H' && placeAbbrev[1] == 'I') {
-			target[n] = target[n-1];
-		}
-		else target[n] = placeAbbrevToId(placeAbbrev);
-	} else str = strtok(NULL," ");
+	} else GGLH = GvGetMoveHistory(gv,player,numReturnedLocs,canFree);
 	*numReturnedLocs = gv->players[player]->numTurns;
 	*canFree = false;
-	return target;
+	free(tempPastPlays);
+	//printf("move[4] is %d\n", GGLH[4]);
+	//printf("n is %d\n",n);
+	return GGLH;
 }
 
 PlaceId *GvGetLastLocations(GameView gv, Player player, int numLocs,
