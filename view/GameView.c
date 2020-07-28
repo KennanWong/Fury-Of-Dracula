@@ -362,12 +362,79 @@ PlaceId *GvGetLastLocations(GameView gv, Player player, int numLocs,
 ////////////////////////////////////////////////////////////////////////
 // Making a Move
 
+// Test 
+// numReturnedLocs is the length of idList
 PlaceId *GvGetReachable(GameView gv, Player player, Round round,
                         PlaceId from, int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	PlaceId* idList = malloc(sizeof(*idList));
+
 	*numReturnedLocs = 0;
-	return NULL;
+
+	// use realloc to allocate memory every time you add an array element
+
+	// Alternative to useing realloc
+	// Add it to a list
+	// Allocate an array of size = size of list
+	// copy the list elements into an array
+	// 
+	
+	for (ConnList curr = MapGetConnections(gv->map, from); curr != NULL; curr = curr->next) {
+		// the hunter can go to an adjacent city by road, boat or rail
+		if (player != PLAYER_DRACULA) { 
+			
+			if (curr->type == ROAD) {
+				// increase length of idList by 1 using realloc and adds the name to the idlist.
+				idList = realloc(idList, (*numReturnedLocs + 1) * sizeof(*idList));
+				idList[(*numReturnedLocs)] = curr->p;
+				(*numReturnedLocs)++;
+			}
+
+			if (curr->type == BOAT) {
+				idList = realloc(idList, (*numReturnedLocs + 1) * sizeof(*idList));
+				idList[(*numReturnedLocs)] = curr->p;
+				(*numReturnedLocs)++;
+			}
+
+			if (curr->type == RAIL) {
+				idList = realloc(idList, (*numReturnedLocs + 1) * sizeof(*idList));
+				idList[(*numReturnedLocs)] = curr->p;
+				(*numReturnedLocs)++;
+			}
+		}
+
+		// dracula can only go by road to boat. 
+		bool *canFree = false;
+		bool hasVisited = false;
+
+		if (player == PLAYER_DRACULA) {
+			// check if dracula has already visited the location.
+			PlaceId* visitedList = GvGetLocationHistory(gv, player, numReturnedLocs, canFree);
+			// if location already visited set hasVisited to true. 
+			for (int i = 0; i < 5; i++) {
+				if(GvGetPlayerLocation(gv, player) == visitedList[i]) {
+					hasVisited = true;
+				}
+			}
+			
+			if (hasVisited != true) {
+				if (curr->type == ROAD) {
+					idList = realloc(idList, (*numReturnedLocs + 1) * sizeof(*idList));
+					idList[(*numReturnedLocs)] = curr->p;
+					(*numReturnedLocs)++;
+				}
+
+				if (curr->type == BOAT) {
+					idList = realloc(idList, (*numReturnedLocs + 1) * sizeof(*idList));
+					idList[(*numReturnedLocs)] = curr->p;
+					(*numReturnedLocs)++;
+				}
+			}
+		} 
+	}
+
+	return idList;
 }
 
 PlaceId *GvGetReachableByType(GameView gv, Player player, Round round,
@@ -375,8 +442,66 @@ PlaceId *GvGetReachableByType(GameView gv, Player player, Round round,
                               bool boat, int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	
+	PlaceId* idList = malloc(sizeof(*idList));
+
 	*numReturnedLocs = 0;
-	return NULL;
+	
+	for (ConnList curr = MapGetConnections(gv->map, from); curr != NULL; curr = curr->next) {
+		// the hunter can go to an adjacent city by road, boat or rail
+		if (player != PLAYER_DRACULA) { 
+			
+			if (curr->type == ROAD && road == true) {
+				// increase length of idList by 1 using realloc and adds the name to the idlist.
+				idList = realloc(idList, (*numReturnedLocs + 1) * sizeof(*idList));
+				idList[(*numReturnedLocs)] = curr->p;
+				(*numReturnedLocs)++;
+			}
+
+			if (curr->type == BOAT && boat == true) {
+				idList = realloc(idList, (*numReturnedLocs + 1) * sizeof(*idList));
+				idList[(*numReturnedLocs)] = curr->p;
+				(*numReturnedLocs)++;
+			}
+
+			if (curr->type == RAIL && rail == true) {
+				idList = realloc(idList, (*numReturnedLocs + 1) * sizeof(*idList));
+				idList[(*numReturnedLocs)] = curr->p;
+				(*numReturnedLocs)++;
+			}
+		}
+
+		// dracula can only go by road to boat. 
+		bool *canFree = false;
+		bool hasVisited = false;
+
+		if (player == PLAYER_DRACULA) {
+			// check if dracula has already visited the location.
+			PlaceId* visitedList = GvGetLocationHistory(gv, player, numReturnedLocs, canFree);
+			// if location already visited set hasVisited to true. 
+			for (int i = 0; i < 5; i++) {
+				if(GvGetPlayerLocation(gv, player) == visitedList[i]) {
+					hasVisited = true;
+				}
+			}
+
+			if (hasVisited != true) {
+				if (curr->type == ROAD && road == true) {
+					idList = realloc(idList, (*numReturnedLocs + 1) * sizeof(*idList));
+					idList[(*numReturnedLocs)] = curr->p;
+					(*numReturnedLocs)++;
+				}
+
+				if (curr->type == BOAT && boat == true) {
+					idList = realloc(idList, (*numReturnedLocs + 1) * sizeof(*idList));
+					idList[(*numReturnedLocs)] = curr->p;
+					(*numReturnedLocs)++;
+				}
+			}
+		} 
+	}
+
+	return idList;
 }
 
 ////////////////////////////////////////////////////////////////////////
