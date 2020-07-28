@@ -268,9 +268,43 @@ PlaceId *GvGetLocationHistory(GameView gv, Player player,
                               int *numReturnedLocs, bool *canFree)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numReturnedLocs = 0;
+	PlaceId *target = malloc(gv->round*sizeof(PlaceId));
+	int pInitial = 0;
+	if(player == 0) pInitial = 'G';
+	else if(player == 1) pInitial = 'S';
+	else if(player == 2) pInitial = 'H';
+	else if(player == 3) pInitial = 'M';
+	else if(player == 4) pInitial = 'D';
+	int n = 0;
+	char *str = strtok(gv->pastGamePlays," ");
+	if(str[0] == pInitial) {
+		char placeAbbrev[2];
+		placeAbbrev[0] = str[1];
+		placeAbbrev[1] = str[2]; 
+		//If the given abbrev is city move (unknown city)
+		if(placeAbbrev[0] == 'C' && placeAbbrev[1] == '?') target[n] = CITY_UNKNOWN;
+
+		//If the given abbrev is sea move (unknown sea)
+		else if(placeAbbrev[0] == 'S' && placeAbbrev[1] == '?') target[n] = SEA_UNKNOWN;
+
+		//If the given abbrev is Dn
+		else if(placeAbbrev[0] == 'D' && placeAbbrev[1] != 'U') {
+			if(placeAbbrev[1] == 49) target[n] = target[n-1];
+			else if(placeAbbrev[1] == 50) target[n] = target[n-2];
+			else if(placeAbbrev[1] == 51) target[n] = target[n-3];
+			else if(placeAbbrev[1] == 52) target[n] = target[n-4];
+			else if(placeAbbrev[1] == 53) target[n] = target[n-5];
+		}
+
+		//If the given abbrev is HI
+		else if(placeAbbrev[0] == 'H' && placeAbbrev[1] == 'I') {
+			target[n] = target[n-1];
+		}
+		else target[n] = placeAbbrevToId(placeAbbrev);
+	} else str = strtok(NULL," ");
+	*numReturnedLocs = gv->players[player]->numTurns;
 	*canFree = false;
-	return NULL;
+	return target;
 }
 
 PlaceId *GvGetLastLocations(GameView gv, Player player, int numLocs,

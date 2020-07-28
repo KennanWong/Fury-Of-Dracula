@@ -51,7 +51,7 @@ int main(void)
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
-	
+	/*
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("After Lord Godalming's turn\n");
@@ -134,7 +134,7 @@ int main(void)
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
-	/*
+	
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("Encountering Dracula\n");
@@ -277,7 +277,7 @@ int main(void)
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
-	*/
+	
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("Testing vampire/trap locations\n");
@@ -360,7 +360,7 @@ int main(void)
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
-	
+	*/
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("Testing move/location history\n");
@@ -375,8 +375,8 @@ int main(void)
 			"GMA.... SSTTTV.";
 		
 		Message messages[32] = {};
-		GameView gv = GvNew(trail, messages);
 		
+		GameView gv = GvNew(trail, messages);
 		assert(GvGetHealth(gv, PLAYER_DR_SEWARD) ==
 				GAME_START_HUNTER_LIFE_POINTS - 2 * LIFE_LOSS_TRAP_ENCOUNTER);
 		assert(GvGetPlayerLocation(gv, PLAYER_DRACULA) == CITY_UNKNOWN);

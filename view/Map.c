@@ -79,7 +79,7 @@ void MapFree(Map m)
 	for (int i = 0; i < m->nV; i++) {
 		ConnList curr = m->connections[i];
 		// free(m->connections[i]->traps);
-		printf("freed traps, now will free adjacency list\n");
+		//printf("freed traps, now will free adjacency list\n");
 		while (curr != NULL) {
 			ConnList next = curr->next;
 			free(curr);
