@@ -207,7 +207,7 @@ int main(void)
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
-	/*
+	/* 
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("Checking that hunters' health points are capped\n");
@@ -426,6 +426,23 @@ int main(void)
 			assert(locs[3] == STRASBOURG);
 			assert(locs[4] == STRASBOURG);
 			assert(locs[5] == CITY_UNKNOWN);
+			if (canFree) free(locs);
+		}
+
+
+		// Get Lord Godalmings past 5 locations
+		{
+			printf("now testing getlastLocs\n");
+			int numLocs = 0; bool canFree = false;
+			int reqLocs = 5;
+			PlaceId *locs = GvGetLastLocations(gv, PLAYER_LORD_GODALMING, reqLocs,
+			                                     &numLocs, &canFree);
+			assert(numLocs == 5);
+			assert(locs[0] == GRANADA);
+			assert(locs[1] == ALICANTE);
+			assert(locs[2] == SARAGOSSA);
+			assert(locs[3] == SANTANDER);
+			assert(locs[4] == MADRID);
 			if (canFree) free(locs);
 		}
 		

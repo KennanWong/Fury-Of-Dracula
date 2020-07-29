@@ -493,10 +493,43 @@ PlaceId *GvGetLastLocations(GameView gv, Player player, int numLocs,
 	
 	return GGLL;
 	*/
-	
-	*numReturnedLocs = 0;
-	*canFree = false;
-	return NULL;
+	int pInitial = 0;
+	if(player == 0) pInitial = 'G';
+	else if(player == 1) pInitial = 'S';
+	else if(player == 2) pInitial = 'H';
+	else if(player == 3) pInitial = 'M';
+	else if(player == 4) pInitial = 'D';
+	PlaceId *temp = malloc(numLocs*sizeof(PlaceId));
+	PlaceId *GGLL = malloc(numLocs*sizeof(PlaceId));
+
+	int c = 0;
+	printf("numLocs = %d\n", numLocs);
+	while (c < numLocs) {
+		for (int i = gv->turnCounter -1; i >= 0; i--) {
+			if (gv->PastPlaysArray[i][0] == pInitial) {
+				printf("founds past move = %s\n", gv->PastPlaysArray[i]);
+				temp[c] = CityIdFromMove(gv->PastPlaysArray[i]);
+				c++;
+				if (c == numLocs) {
+					break;
+				}
+			}
+		}
+	}
+	printf("c = %d\n", c);
+	*numReturnedLocs = c;
+	// copy temp into GGLL and reverse order
+	for (int i = 0; i < c; i++) {
+		GGLL[i] = temp[c-1-i];
+	}
+
+	for (int i = 0; i < c; i++) {
+		printf("move i = %d to loc = %s\n", i, placeIdToName(GGLL[i]));
+	}
+
+	free(temp);
+	*canFree = true;
+	return GGLL;
 	
 }
 
