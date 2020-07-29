@@ -402,7 +402,8 @@ PlaceId *GvGetLastLocations(GameView gv, Player player, int numLocs,
                             int *numReturnedLocs, bool *canFree)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	/*PlaceId *GGLL = malloc(gv->players[player]->numTurns*sizeof(PlaceId));
+	/*
+	PlaceId *GGLL = malloc(gv->players[player]->numTurns*sizeof(PlaceId));
 	int start = gv->players[player]->numTurns - numLocs;
 	printf("numMoves is %d\n",gv->players[player]->numTurns);
 	printf("numLocs is %d\n",numLocs);
@@ -421,11 +422,19 @@ PlaceId *GvGetLastLocations(GameView gv, Player player, int numLocs,
 	printf("count is %d\n", count);
 	*numReturnedLocs = count;
 	*canFree = false;
+	
+	printf("%d\n", GGLL[0]);
+	printf("%d\n", GGLL[1]);
+	printf("%d\n", GGLL[2]);
+	printf("%d\n", GGLL[3]);
+	
 	return GGLL;
 	*/
+	
 	*numReturnedLocs = 0;
 	*canFree = false;
 	return NULL;
+	
 }
 
 ////////////////////////////////////////////////////////////////////////
