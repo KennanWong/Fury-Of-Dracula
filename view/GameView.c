@@ -550,18 +550,35 @@ void ProcessDracula(GameView gv, char *move) {
 	// Process movement
 	Players *Dracula = gv->players[PLAYER_DRACULA];
 	PlaceId currLoc = CityIdFromMove(move);
+	printf("move = %s\n", move);
 	if (move[1] == 'D') {
 		showPastPlaysArray(gv);
-		printf("move = %s\n", move);
 		int DBval = move[2] - '0';
 		printf("gv->turnCounter - DBval*5 = %d\n", gv->turnCounter - DBval*5);
 		currLoc = CityIdFromMove(gv->PastPlaysArray[gv->turnCounter - DBval*5]);
+		printf("newwCurrLoc = %d\n", currLoc);
 	} else if (currLoc == HIDE) {
 		currLoc = Dracula->currLoc;
-	} else if (placeIdToType(currLoc) == SEA) {
+		printf("Dracula has hid and is now at %s\n", placeIdToName(currLoc));
+	} 
+
+	if (currLoc >= HIDE) {
+		// double backed to a hide move for example, find the most recent location
+		int i  = 0;
+		while (currLoc >= HIDE) {
+			currLoc = CityIdFromMove(gv->PastPlaysArray[gv->turnCounter - i*5]);
+			i++;
+		}
+	}
+
+	if (placeIdToType(currLoc) == SEA) {
 		gv->players[PLAYER_DRACULA]->health = gv->players[PLAYER_DRACULA]->health - LIFE_LOSS_SEA;
 	}
 	Dracula->currLoc = currLoc;
+
+	if (currLoc == CASTLE_DRACULA) {
+		Dracula->health = Dracula->health + LIFE_GAIN_CASTLE_DRACULA;
+	}
 
 	// Process action
 	char action[4];
@@ -636,6 +653,8 @@ void ProcessHunter(GameView gv, char *move, Players *player){
 			// the hunter has died, and will need to telelport to hospital
 			player->currLoc = ST_JOSEPH_AND_ST_MARY;
 			player->health = 0;
+			gv->CurrentScore = gv->CurrentScore - SCORE_LOSS_HUNTER_HOSPITAL;
+			printf("hunter went to hospital\n");
 			return;
 		}
 	}
