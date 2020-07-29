@@ -175,8 +175,8 @@ GameView GvNew(char *pastPlays, Message messages[])
 		
 	}
 	showPastPlaysArray(new);
-	free(tempPastPlays);
 	
+	// free(tempPastPlays);
 	return new;
 }
 
