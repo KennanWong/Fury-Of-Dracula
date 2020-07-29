@@ -263,7 +263,7 @@ PlaceId *HvWhereCanIGoByType(HunterView hv, bool road, bool rail,
 	ConnList List = MapGetConnections(hv->map, CurrCityId);
 
 	//Checking which type of transport are not allowed
-
+	
 	
 	//Transferring all of the places in List into HWCIGBT
 	int m = 0;
@@ -273,21 +273,21 @@ PlaceId *HvWhereCanIGoByType(HunterView hv, bool road, bool rail,
 		while(possible != 1) {
 			//If any of the 3 transport types is false, you can only break the loop
 			//by having a placeId that is not that transport type
-			if(road == false) {
-				if(placeIdToType(List->p) == ROAD) {
+			/*if(road == false) {
+				if(List->type == ROAD) {
 					List = List->next;
 				} else possible = 1;
 			}
 			if(rail == false) {
-				if(placeIdToType(List->p) == RAIL) {
+				if(NULL) {
 					List = List->next;
 				} else possible = 1;
 			}
 			if(boat == false) {
-				if(placeIdToType(List->p) == BOAT) {
+				if(NULL) == BOAT) {
 					List = List->next;
 				} else possible = 1;
-			}
+			}*/
 			//If all transport types are true, break out of loop
 			if(road == true && rail == true && boat == true) {
 				possible = 1;
@@ -362,7 +362,7 @@ PlaceId *HvWhereCanTheyGoByType(HunterView hv, Player player,
 		while(possible != 1) {
 			//If any of the 3 transport types is false, you can only break the loop
 			//by having a placeId that is not that transport type
-			if(road == false) {
+			/*if(road == false) {
 				if(placeIdToType(List->p) == ROAD) {
 					List = List->next;
 				} else possible = 1;
@@ -377,6 +377,7 @@ PlaceId *HvWhereCanTheyGoByType(HunterView hv, Player player,
 					List = List->next;
 				} else possible = 1;
 			}
+			*/
 			//If all transport types are true, break out of loop
 			if(road == true && rail == true && boat == true) {
 				possible = 1;
