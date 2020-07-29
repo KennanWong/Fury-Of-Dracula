@@ -115,7 +115,8 @@ GameView GvNew(char *pastPlays, Message messages[])
 		new->players[i] = newPlayer;
 	
 	}
-	new->PastPlaysArray = malloc(sizeof(*new->PastPlaysArray));
+
+	new->PastPlaysArray = malloc(sizeof(*new->PastPlaysArray)*(strlen(pastPlays)/8));
 	new->messages = messages;
 
 	// process pastplays and seperate each to their respective players
@@ -132,14 +133,24 @@ GameView GvNew(char *pastPlays, Message messages[])
 	*/
 	// Processing the moves of each player
 	char *tempPastPlays = strdup(pastPlays);
-	
-	
-	
+	// char *toFree = tempPastPlays;
+	/*
+	        char *token, *string, *tofree;
+
+           tofree = string = strdup("abc,def,ghi");
+           assert(string != NULL);
+
+           while ((token = strsep(&string, ",")) != NULL)
+                   printf("%s\n", token);
+
+           free(tofree);
+	*/
 	if (strlen(pastPlays) != 0) {
 		// take each 6 char play seperately
-		char *str = strtok(tempPastPlays, " ");
+		// char *str = strsep(tempPastPlays, " ");
+		char *str;
 		int i = 0;
-		while (str != NULL) {	
+		while ((str = strsep(&tempPastPlays, " ")) != NULL) {	
 			// i%5 will determine who made the move
 			int playerId = i%5;
 			Players *currPlayer = new->players[playerId];
@@ -152,16 +163,16 @@ GameView GvNew(char *pastPlays, Message messages[])
 			i+=1;
 			// if we are processing draculas move
 			if (str[0] == 'D') {
-				ProcessDracula(new, str);
+				ProcessDracula(new, new->PastPlaysArray[new->turnCounter]);
 			} else {
 				if (currPlayer->health == 0) {
 					currPlayer->health = GAME_START_HUNTER_LIFE_POINTS;
 				}
-				ProcessHunter(new, str, currPlayer);
+				ProcessHunter(new, new->PastPlaysArray[new->turnCounter], currPlayer);
 			}
 			
 			// Move onto next person turn
-			str = strtok(NULL, " ");
+			// str = strtok(NULL, " ");
 			
 			if (new->round != i/5) {
 				// we have reached a new round, deduct points
@@ -177,6 +188,7 @@ GameView GvNew(char *pastPlays, Message messages[])
 	showPastPlaysArray(new);
 	
 	// free(tempPastPlays);
+	// free(toFree);
 	return new;
 }
 
@@ -259,7 +271,7 @@ PlaceId *GvGetMoveHistory(GameView gv, Player player,
                           int *numReturnedMoves, bool *canFree)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	//printf("\nStart of GvGetMoveHistory function\n");
+	printf("\nStart of GvGetMoveHistory function\n");
 	PlaceId *GGMH = malloc(gv->players[player]->numTurns*sizeof(PlaceId));
 	int pInitial = 0;
 	if(player == 0) pInitial = 'G';
@@ -268,11 +280,24 @@ PlaceId *GvGetMoveHistory(GameView gv, Player player,
 	else if(player == 3) pInitial = 'M';
 	else if(player == 4) pInitial = 'D';
 	assert(pInitial != 0);
-	//printf("pInitial is %d\n",pInitial);
+	printf("pInitial is %d\n",pInitial);
 	//printf("gv->pastGamePlays is %s\n",gv->pastGamePlays);
-	char *tempPastPlays = strdup(gv->pastGamePlays);
-	int n = 0;
-	char *str = strtok(tempPastPlays," ");
+	// char *tempPastPlays = strdup(gv->pastGamePlays);
+	// int n = 0;
+	// char *str = strtok(tempPastPlays," ");
+	
+	printf("////////////////////////////////////////");
+	showPastPlaysArray(gv);
+	int mCounter = 0;
+	for (int i = 0; i < gv->turnCounter; i++) {
+		if (gv->PastPlaysArray[i][0] == pInitial) {
+			printf("players move = %s\n", gv->PastPlaysArray[i]);
+			GGMH[mCounter] = CityIdFromMove(gv->PastPlaysArray[i]);
+			mCounter++;
+		}
+	}
+	
+	/*
 	while(str != NULL) {
 		if(str[0] == pInitial) {
 			char placeAbbrev[2];
@@ -305,10 +330,14 @@ PlaceId *GvGetMoveHistory(GameView gv, Player player,
 		str = strtok(NULL," ");
 		
 	}
+	*/
 	printf("NumTurn is %d\n",gv->players[player]->numTurns);
 	*numReturnedMoves = gv->players[player]->numTurns;
-	*canFree = false;
-	free(tempPastPlays);
+
+	
+	
+	*canFree = true;
+	// free(tempPastPlays);
 	//printf("move[0] is %d\n", GGMH[0]);
 	//printf("n is %d\n",n);
 	return GGMH;
@@ -353,6 +382,7 @@ PlaceId *GvGetLocationHistory(GameView gv, Player player,
 	assert(pInitial != 0);
 	//printf("pInitial is %d\n",pInitial);
 	//printf("gv->pastGamePlays is %s\n",gv->pastGamePlays);
+	/*
 	char *tempPastPlays = strdup(gv->pastGamePlays);
 	int n = 0;
 	char *str = strtok(tempPastPlays," ");
@@ -390,9 +420,42 @@ PlaceId *GvGetLocationHistory(GameView gv, Player player,
 			
 		}
 	} else GGLH = GvGetMoveHistory(gv,player,numReturnedLocs,canFree);
+	*/
+	printf("////////////////////////////////////////");
+	showPastPlaysArray(gv);
+	int LCounter = 0;
+	for (int i = 0; i < gv->turnCounter; i++) {
+		if (gv->PastPlaysArray[i][0] == pInitial) {
+			/*
+			GGMH[mCounter] = CityIdFromMove(gv->PastPlaysArray[i]);
+			mCounter++;
+			*/
+			PlaceId LId = CityIdFromMove(gv->PastPlaysArray[i]);
+			if (pInitial == 'D') {
+				// if we processing dracular
+				if (LId > MAX_REAL_PLACE) {
+					// move is either double back or hide
+					if (LId == HIDE) {
+						LId = GGLH[LCounter-1];
+					} else if (LId >= DOUBLE_BACK_1) {
+						int DBval = LId - HIDE;
+						printf("DBval = %d\n", DBval);
+						LId = GGLH[LCounter-DBval];
+						printf("LCounter-DBval = %d\n", LCounter-DBval);
+						printf("LId = %d\n", LId);
+					}
+				}
+
+			}
+			GGLH[LCounter] = LId;
+			printf("Player made move %s now at %s\n", gv->PastPlaysArray[i], placeIdToName(GGLH[LCounter]));
+			LCounter++;
+		}
+	}
+	
 	*numReturnedLocs = gv->players[player]->numTurns;
 	*canFree = false;
-	free(tempPastPlays);
+	// free(tempPastPlays);
 	//printf("move[4] is %d\n", GGLH[4]);
 	//printf("n is %d\n",n);
 	return GGLH;
@@ -463,11 +526,17 @@ PlaceId *GvGetReachableByType(GameView gv, Player player, Round round,
 // TODO
 
 PlaceId CityIdFromMove(char *str) {
+	char buff[3];
+	buff[0] = str[1];
+	buff[1] = str[2];
+	buff[2] = '\0';
+	/*
 	char *abbrev = malloc(sizeof(*abbrev));
 	abbrev[0] = str[1];
 	abbrev[1] = str[2];
-	PlaceId id = placeAbbrevToId(abbrev);
-	free(abbrev);
+	*/
+	PlaceId id = placeAbbrevToId(buff);
+	// free(abbrev);
 	return id;
 }
 

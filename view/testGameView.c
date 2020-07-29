@@ -375,10 +375,12 @@ int main(void)
 		assert(GvGetVampireLocation(gv) == NOWHERE);
 		*/
 		// Lord Godalming's move/location history
+		printf("////////////////////////////////////////\n");
 		{
 			int numMoves = 0; bool canFree = false;
 			PlaceId *moves = GvGetMoveHistory(gv, PLAYER_LORD_GODALMING,
 			                                  &numMoves, &canFree);
+			printf("numMoves = %d\n", numMoves);
 			assert(numMoves == 7);
 			assert(moves[0] == LISBON);
 			assert(moves[1] == CADIZ);
@@ -395,13 +397,21 @@ int main(void)
 			int numMoves = 0; bool canFree = false;
 			PlaceId *moves = GvGetMoveHistory(gv, PLAYER_DRACULA,
 			                                  &numMoves, &canFree);
+			// printf("recieved location history of dracula\n");
 			assert(numMoves == 6);
+			
 			assert(moves[0] == STRASBOURG);
+			printf("have move 1\n");
 			assert(moves[1] == CITY_UNKNOWN);
+			printf("have move 2\n");
 			assert(moves[2] == CITY_UNKNOWN);
+			printf("have move 3\n");
 			assert(moves[3] == DOUBLE_BACK_3);
+			printf("have move 4\n");
 			assert(moves[4] == HIDE);
+			printf("have move 5\n");
 			assert(moves[5] == CITY_UNKNOWN);
+			printf("have move 6\n");
 			if (canFree) free(moves);
 		}
 		

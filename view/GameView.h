@@ -256,4 +256,6 @@ PlaceId *GvGetReachableByType(GameView gv, Player player, Round round,
 
 // TODO
 
+void showPastPlaysArray(GameView gv);
+
 #endif // !defined (FOD__GAME_VIEW_H_)
