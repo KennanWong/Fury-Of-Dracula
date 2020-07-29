@@ -357,6 +357,15 @@ PlaceId *GvGetLastLocations(GameView gv, Player player, int numLocs,
 
 	int c = 0;
 	
+	while (c < numLocs) {
+		for (int i = gv->turnCounter -1; i >= 0; i--) {
+			if (gv->PastPlaysArray[i][0] == pInitial) {
+				
+				temp[c] = CityIdFromMove(gv->PastPlaysArray[i]);
+				c++;
+				if (c == numLocs) {
+					break;
+				}
 			}
 		}
 	}
@@ -380,6 +389,7 @@ PlaceId *GvGetLastLocations(GameView gv, Player player, int numLocs,
 // numReturnedLocs is the length of idList
 PlaceId *GvGetReachable(GameView gv, Player player, Round round,
                         PlaceId from, int *numReturnedLocs)
+{
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	PlaceId* idList = malloc(sizeof(*idList));
 

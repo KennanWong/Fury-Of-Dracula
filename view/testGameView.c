@@ -454,16 +454,7 @@ int main(void)
 			assert(locs[1] == HIDE);
 			assert(locs[2] == CITY_UNKNOWN);
 		}
-		//Testing GvGetLastLocations
-		{
-			int numLocs = 0; bool canFree = false;
-			PlaceId *locs = GvGetLastLocations(gv, PLAYER_DRACULA, 3, &numLocs, &canFree);
-
-			assert(numLocs == 3);
-			assert(locs[0] == STRASBOURG);
-			assert(locs[1] == STRASBOURG);
-			assert(locs[2] == CITY_UNKNOWN);
-		}
+		
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
