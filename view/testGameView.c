@@ -51,7 +51,7 @@ int main(void)
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
-	/*
+	
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("After Lord Godalming's turn\n");
@@ -207,7 +207,7 @@ int main(void)
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
-	
+	/*
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("Checking that hunters' health points are capped\n");
@@ -218,13 +218,13 @@ int main(void)
 	
 		Message messages[6] = {};
 		GameView gv = GvNew(trail, messages);
-	
+		
 		assert(GvGetHealth(gv, GAME_START_HUNTER_LIFE_POINTS));
 		
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
-	
+	*/
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("Testing a hunter 'dying'\n");
@@ -352,7 +352,7 @@ int main(void)
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
-	*/
+	
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("Testing move/location history\n");
