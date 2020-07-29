@@ -43,7 +43,7 @@ int main(void)
 		HvFree(hv);
 		printf("Test passed\n");
 	}
-
+	/*
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("After Lord Godalming's turn\n");
@@ -364,7 +364,7 @@ int main(void)
 		HvFree(hv);
 		printf("Test passed!\n");
 	}
-	
+	*/
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("Checking Galatz road connections "
@@ -373,11 +373,11 @@ int main(void)
 		char *trail = "GGA....";
 		Message messages[1] = {};
 		HunterView hv = HvNew(trail, messages);
-		
+		printf("HvNew works\n");
 		int numLocs = -1;
 		PlaceId *locs = HvWhereCanTheyGoByType(hv, PLAYER_LORD_GODALMING,
 		                                       true, false, false, &numLocs);
-		
+		printf("HvWherecanTheyGobyType works\n");
 		assert(numLocs == 5);
 		sortPlaces(locs, numLocs);
 		assert(locs[0] == BUCHAREST);

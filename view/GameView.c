@@ -64,7 +64,6 @@ void ProcessHunter(GameView gv, char *move, Players *player);
 
 void MatureVampire(GameView gv);
 
-
 ////////////////////////////////////////////////////////////////////////
 // Constructor/Destructor
 
