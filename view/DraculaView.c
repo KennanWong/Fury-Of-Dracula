@@ -170,7 +170,8 @@ void DvFree(DraculaView dv)
 Round DvGetRound(DraculaView dv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return dv->round;
+	return GvGetRound(dv->gv);
+
 }
 
 int DvGetScore(DraculaView dv)
@@ -178,43 +179,34 @@ int DvGetScore(DraculaView dv)
 	//Note: Dracula wants the game score to be low.
 
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return dv->CurrentScore;
+	return GvGetScore(dv->gv);
 }
 
 int DvGetHealth(DraculaView dv, Player player)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return dv->players[player]->health;
+	return GvGetHealth(dv->gv, players[player]);
 }
 
 PlaceId DvGetPlayerLocation(DraculaView dv, Player player)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return dv->players[player]->currLoc;
-}
+	return GvGetPlayerLocation(dv->gv, players[player]);
+
 
 
 PlaceId DvGetVampireLocation(DraculaView dv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return dv->VampireLocation;
-}
+	return GvGetVampireLocation(dv->gv);
 }
 
 PlaceId *DvGetTrapLocations(DraculaView dv, int *numTraps)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	// Cycle through each city and gather all traps, return number of traps back
-	PlaceId *TrapLocations = malloc(sizeof(*TrapLocations));
-	for (PlaceId i = 0; i < NUM_REAL_PLACES; i++) {
-		int NumTrapsAtLoc = GetTrapsLoc(i, gv->map);
-		for (int t = 0; t < NumTrapsAtLoc; t++) {
-			TrapLocations[*numTraps] = i;
-			*numTraps = *numTraps + 1;
-		}
-	}
+	return GvGetTrapLocations(dv->gv, numTraps);
 
-	return TrapLocations;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -230,6 +222,61 @@ PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
 {
 
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	PlaceId *wherecanigo = malloc(hv->round*sizeof(PlaceId));
+    int i = 0, n = 0, flag = 0;
+    bool hasVisited = false;
+
+    //checks to see if the current player is the dracula
+    if (player == PLAYER_DRACULA) {
+
+        //checks to see if a move has been made yet
+        if (dv->players[player]->pastPlays[n] != NULL) {
+            
+            //current location of the dracula
+            PlaceId currentlocation = DvGetPlayerLocation(dv, players[player]);
+            //all the connected locations to the current location
+            ConnList listofconnections = MapGetConnections(hv->map, currentlocation);
+
+            //if there is no location for the dracula to go to, it will teleport to Castle Dracula
+            if (listofconnections == NULL) {
+                flag = 1;
+            }
+
+            //if there is connected locations to the current location, enter loop
+            while (listofconnections != NULL) {
+
+                //gets the last 6 locations of the dracula (trail) to find the locations he cannot travel to
+                PlaceId* visitedList = GvGetLocationHistory(dv->gv, player, numReturnedLocs, canFree);
+
+                for (int j = 0; j < 5; i++) {
+                    if(listofconnetions == visitedList[j]) {
+                        hasVisited = true;
+                    }
+                }
+
+                //this loops through all the possible locations the dracula can travel to
+                //and inserts the locations into the array wherecanigo
+                if (hasVisited != true) {
+                    if ((listofconnections->type == ROAD) || (listofconnections->type == BOAT)) {
+                        wherecanigo[i] = listofconnections->p;
+                        //proceeds to go to the next node in the linked list consisting of locations in 
+                        //which dracula can travel to
+                        listofconnections = listofconnections->next;
+                        i++;
+                    }
+                }
+            }
+        }
+        flag = 1;
+
+        if (flag == 1) {
+            *numReturnedLocs = 0;
+            return NULL;
+        }
+
+    }
+    *numReturnedLocs = i;
+    return wherecanigo;
 
 
 }
