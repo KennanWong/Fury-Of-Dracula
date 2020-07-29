@@ -429,6 +429,26 @@ int main(void)
 			if (canFree) free(locs);
 		}
 		
+		//Testing GvGetLastMoves
+		{
+			int numMoves = 0; bool canFree = false;
+			PlaceId *locs = GvGetLastMoves(gv, PLAYER_DRACULA, 3, &numMoves, &canFree);
+
+			assert(numMoves == 3);
+			assert(locs[0] == DOUBLE_BACK_3);
+			assert(locs[1] == HIDE);
+			assert(locs[2] == CITY_UNKNOWN);
+		}
+		//Testing GvGetLastLocations
+		{
+			int numLocs = 0; bool canFree = false;
+			PlaceId *locs = GvGetLastLocations(gv, PLAYER_DRACULA, 3, &numLocs, &canFree);
+
+			assert(numLocs == 3);
+			assert(locs[0] == STRASBOURG);
+			assert(locs[1] == STRASBOURG);
+			assert(locs[2] == CITY_UNKNOWN);
+		}
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
