@@ -231,10 +231,10 @@ PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
 	LocationID draclocation = DvGetPlayerLocation(dv, PLAYER_DRACULA);
 
 	//all the connected locations to the current location
-	ConnList listofconnections = MapGetConnections(hv->map, draclocation);
+	PlaceId listofconnections = GvGetReachable(dv->gv,PLAYER_DRACULA,dv->round,draclocation,numReturnedLocs);
 
 	int size = *numLocations;
-	int count = 0;
+	int invalid = 0;
 	int hide = FALSE;
 	int doubleback = FALSE;
 
@@ -253,24 +253,27 @@ PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
 
 		//checks to see if trail or double back is in the trail
 		//if it is present, marks either doubleback or hide as true as these are locations that cannot be accessed now
-		for(int i = 0; i < TRAIL_SIZE; i++) {
+		int i = 0;
+		while (i < TRAIL_SIZE) {
 			if(trail[i] == DOUBLE_BACK_1 || trail[i] == DOUBLE_BACK_2 || trail[i] == DOUBLE_BACK_3 ||
 			trail[i] == DOUBLE_BACK_4 ||trail[i] == DOUBLE_BACK_5) {
 				doubleback = TRUE;
 			}
+
 			if(dracTrail[i] == HIDE) {
 				hide = TRUE;
 			}
+			i++
 		}
 
 		//incrememnts count everytime a possible location the dracula can travel to is also the same location
 		//which is present in trail
 		if(doubleback == TRUE){
-			for(int j = 0; j < TRAIL_SIZE; j++){
+			for(int d = 0; d < TRAIL_SIZE; d++){
 				for(int k = 0; k < size; k++){
-					if(trail[i] == listofconnections[j]){
-						count++;
-						listofconnections[j] = -1;
+					if(trail[d] == listofconnections[k]){
+						invalid++;
+						listofconnections[k] = -1;
 					}
 				}
 			}
@@ -278,18 +281,17 @@ PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
 
 		//incrememnts count everytime a possible location the dracula can travel to is also the same location
 		//which is present in trail
-		int p = 0;
 		if(hide == TRUE){
-			for(p = 0; p < size; p++){
+			for(int p = 0; p < size; p++){
 				if(listofconnections[p] == draclocation){
 					listofconnections[p] = -1;
-					count++;
+					invalid++;
 				}
 			}
 		}
 
 		//the real amount of locations the dracula can travel to after adapting to dracula restrictions
-		*numLocations = size - count;
+		*numLocations = size - invalid;
 		LocationID *newconnections = malloc(sizeof(LocationID) * (*numLocations));
 
 		int l = 0, m = 0;
@@ -317,7 +319,98 @@ PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
 PlaceId *DvWhereCanIGoByType(DraculaView dv, bool road, bool boat,
                              int *numReturnedLocs)
 {
+	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	LocationID trail[TRAIL_SIZE] = {0};
+
+	//gets the last 6 locations of the dracula (trail)
+	PlaceId* visitedList = draculatrail(dv, PLAYER_DRACULA, trail[TRAIL_SIZE])
+
+	//current location of dracula
+	LocationID draclocation = DvGetPlayerLocation(dv, PLAYER_DRACULA);
+
+	//all the connected locations to the current location
+	PlaceId listofconnections = GvGetReachableByType(dv->gv,PLAYER_DRACULA,dv->round,draclocation, road, 0, boat, numReturnedLocs);
+
+	int size = *numLocations;
+	int invalid = 0;
+	int hide = FALSE;
+	int doubleback = FALSE;
+
+	//if there is no location for the dracula to go to, it will teleport to Castle Dracula
 	
+
+	if (draclocation == NOWHERE) {
+			flag = 1;
+	} 
+	
+	if (listofconnections == NULL) {
+		flag = 1;
+	}
+
+	while (listofconnections != NULL) {
+
+		//checks to see if trail or double back is in the trail
+		//if it is present, marks either doubleback or hide as true as these are locations that cannot be accessed now
+		int i = 0;
+		while (i < TRAIL_SIZE) {
+			if(trail[i] == DOUBLE_BACK_1 || trail[i] == DOUBLE_BACK_2 || trail[i] == DOUBLE_BACK_3 ||
+			trail[i] == DOUBLE_BACK_4 ||trail[i] == DOUBLE_BACK_5) {
+				doubleback = TRUE;
+			}
+
+			if(dracTrail[i] == HIDE) {
+				hide = TRUE;
+			}
+			i++
+		}
+
+		//incrememnts count everytime a possible location the dracula can travel to is also the same location
+		//which is present in trail
+		if(doubleback == TRUE){
+			for(int d = 0; d < TRAIL_SIZE; d++){
+				for(int k = 0; k < size; k++){
+					if(trail[d] == listofconnections[k]){
+						invalid++;
+						listofconnections[k] = -1;
+					}
+				}
+			}
+		}
+
+		//incrememnts count everytime a possible location the dracula can travel to is also the same location
+		//which is present in trail
+		if(hide == TRUE){
+			for(int p = 0; p < size; p++){
+				if(listofconnections[p] == draclocation){
+					listofconnections[p] = -1;
+					invalid++;
+				}
+			}
+		}
+
+		//the real amount of locations the dracula can travel to after adapting to dracula restrictions
+		*numLocations = size - invalid;
+		LocationID *newconnections = malloc(sizeof(LocationID) * (*numLocations));
+
+		int l = 0, m = 0;
+		while(l < numLocations) {
+			if(listofconnections[m] != -1){
+				if ((listofconnections->type == ROAD) || (listofconnections->type == BOAT)) {
+					newconnections[l] = listofconnections[m];
+					l++;
+				}
+			}
+			m++;
+		}
+	}
+
+	if (flag == 1) {
+		*numReturnedLocs = 0;
+		return NULL;
+	}
+
+	return newconnections;
+
 }
 
 
