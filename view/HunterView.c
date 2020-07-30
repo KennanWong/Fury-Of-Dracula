@@ -193,20 +193,9 @@ PlaceId *HvWhereCanIGo(HunterView hv, int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	PlaceId *HWCIG = malloc(hv->round*sizeof(PlaceId));
-	char *tempPastPlays = strdup(hv->pastGamePlays);
 	*numReturnedLocs = 0;
 	//Calculating the player we are right now
-	char *str = strtok(tempPastPlays, " ");
-	
-	int i = 0;
-	int playerId;
-	//Looping until we are at the desired player
-	while (str != NULL) {
-		playerId = i%5;
-		str = strtok(NULL, " ");
-		i++;
-	}
-	playerId = i%5;
+	Player playerId = HvGetPlayer(hv);
 
 	//Defining the current location of the player given as CurrCityId
 	PlaceId CurrCityId = GvGetPlayerLocation(hv->gv, playerId);
@@ -230,19 +219,8 @@ PlaceId *HvWhereCanIGoByType(HunterView hv, bool road, bool rail,
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	PlaceId *HWCIGBT = malloc(hv->round*sizeof(PlaceId));
-	char *tempPastPlays = strdup(hv->pastGamePlays);
 
-	//Calculating the player we are right now
-	char *str = strtok(tempPastPlays, " ");
-	*numReturnedLocs = 0;
-	int i = 0;
-	int playerId;
-	while (str != NULL) {
-		playerId = i%5;
-		str = strtok(NULL, " ");
-		i++;
-	}
-	playerId = i%5;
+	Player playerId = HvGetPlayer(hv);
 
 	//Defining the current location of the player given as CurrCityId
 	PlaceId CurrCityId = GvGetPlayerLocation(hv->gv, playerId);
