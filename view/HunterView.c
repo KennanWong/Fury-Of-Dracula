@@ -329,35 +329,15 @@ PlaceId *HvWhereCanTheyGoByType(HunterView hv, Player player,
 	}
 	printf("Flag1\n");
 	printf("%d\n",CurrCityId);
-	ConnList List = MapGetConnections(hv->map, CurrCityId);
+	PlaceId *List = GvGetReachableByType(hv->gv,player,hv->round,CurrCityId,road,rail,boat,numReturnedLocs);
 	printf("Flag2\n");
 	//Transferring all of the places in List into HWCIGBT
-	while(List != NULL) {
-		int possible = 0;
-		while(possible != 1) {
-			if(road == false) {
-				if(List->type == road) {
-					List = List->next;
-				} else possible = 1;
-			}
-			if(rail == false) {
-				if(List->type == rail) {
-					List = List->next;
-				} else possible = 1;
-			}
-			if(boat == false) {
-				if(List->type == boat) {
-					List = List->next;
-				} else possible = 1;
-			}
-			if(road == true && rail == true && boat == true) {
-				possible = 1;
-			}
-		}
-		HWCTGBT[(*numReturnedLocs)] = List->p;
-		List = List->next;
+	int i = 0;
+	while(i < *numReturnedLocs) {
+		HWCTGBT[i] = List[i];
+		i++;
 	}
-
+	printf("%d",*numReturnedLocs);
 	return HWCTGBT;
 }
 
