@@ -382,11 +382,11 @@ int main(void)
 		char *trail = "GGA....";
 		Message messages[1] = {};
 		HunterView hv = HvNew(trail, messages);
-		printf("HvNew works\n");
+		
 		int numLocs = -1;
 		PlaceId *locs = HvWhereCanTheyGoByType(hv, PLAYER_LORD_GODALMING,
 		                                       true, false, false, &numLocs);
-		printf("HvWherecanTheyGobyType works\n");
+		
 		assert(numLocs == 5);
 		sortPlaces(locs, numLocs);
 		assert(locs[0] == BUCHAREST);
@@ -412,7 +412,7 @@ int main(void)
 		int numLocs = -1;
 		PlaceId *locs = HvWhereCanTheyGoByType(hv, PLAYER_LORD_GODALMING,
 		                                       false, true, false, &numLocs);
-		printf("numLocs is %d",numLocs);
+		
 		assert(numLocs == 5);
 		sortPlaces(locs, numLocs);
 		assert(locs[0] == BORDEAUX);

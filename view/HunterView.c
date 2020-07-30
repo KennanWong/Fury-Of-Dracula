@@ -290,9 +290,11 @@ PlaceId *HvGetShortestPathTo(HunterView hv, Player hunter, PlaceId dest,
 	
 	
 	*pathLength = DstFromOg[dest];
+	/*
 	for (int i = 0; i < *pathLength; i++) {
 		printf("ShortestPath[%d] = %s\n", i, placeIdToName(ShortestPath[i]));
 	}
+	*/
 	// printf("pathLength = %d\n", *pathLength);
 	return ShortestPath;
 }
@@ -344,7 +346,7 @@ PlaceId *HvWhereCanIGoByType(HunterView hv, bool road, bool rail,
 	
 	//Transferring all of the places in List into HWCIGBT
 	PlaceId *List = GvGetReachableByType(hv->gv,playerId,hv->round,CurrCityId,road,rail,boat,numReturnedLocs);
-	printf("Flag2\n");
+	// printf("Flag2\n");
 	//Transferring all of the places in List into HWCIGBT
 	int n = 0;
 	while(n < *numReturnedLocs) {
@@ -400,10 +402,10 @@ PlaceId *HvWhereCanTheyGoByType(HunterView hv, Player player,
 	int i = 0;
 	while(i < *numReturnedLocs) {
 		HWCTGBT[i] = List[i];
-		printf("HWCTGBT[%d] = %s\n", i, placeIdToName(HWCTGBT[i]));
+		// printf("HWCTGBT[%d] = %s\n", i, placeIdToName(HWCTGBT[i]));
 		i++;
 	}
-	printf("numReturnedLocs after GvGetReachablebyType is %d\n",*numReturnedLocs);
+	// printf("numReturnedLocs after GvGetReachablebyType is %d\n",*numReturnedLocs);
 	free(List);
 	return HWCTGBT;
 }
