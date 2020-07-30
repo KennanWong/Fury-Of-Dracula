@@ -261,4 +261,6 @@ PlaceId CityIdFromMove(char *str);
 
 PlaceId *ReturnTrailAtRound(GameView gv, Round round, int *DcNumReturnedLoc, bool *canFree);
 
+void showPastPlaysArray(GameView gv);
+
 #endif // !defined (FOD__GAME_VIEW_H_)

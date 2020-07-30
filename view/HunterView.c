@@ -18,9 +18,12 @@
 #include "GameView.h"
 #include "HunterView.h"
 #include "Map.h"
-#include "Places.h"
+
 // add your own #includes here
+#include "Places.h"
+#include "Queue.h"
 #include <string.h>
+
 // TODO: ADD YOUR OWN STRUCTS HERE
 typedef struct{
 	Player player;
@@ -142,9 +145,11 @@ PlaceId HvGetVampireLocation(HunterView hv)
 PlaceId HvGetLastKnownDraculaLocation(HunterView hv, Round *round)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*round = 0;
+	// *round = 0;
 	PlaceId LastKnown = NOWHERE;
 	// need to find draculas trail, if any of the hunters have been on that path, update last known
+
+	// Round temp = -1;
 
 	for (int i = 0; i < 4; i++) {
 		int HuNumReturnedLoc;
@@ -156,8 +161,8 @@ PlaceId HvGetLastKnownDraculaLocation(HunterView hv, Round *round)
 			PlaceId *DrculasTrail = ReturnTrailAtRound(hv->gv, h, &DnumReturnedLoc, &canFree);
 			for (int l = 0; l < DnumReturnedLoc; l++){
 				if (HuPastLocs[h] == DrculasTrail[l]) {
-					if (*round < h) {
-						*round = h;
+					if (*round < l) {
+						*round = l;
 						LastKnown = HuPastLocs[h];
 					}		
 				}
@@ -167,7 +172,8 @@ PlaceId HvGetLastKnownDraculaLocation(HunterView hv, Round *round)
 			}		
 		}
 	}
-	printf("lastknowLocation =  %d\n", LastKnown);
+	printf("lastknowLocation =  %s\n", placeIdToName(LastKnown));
+	printf("round number %d\n", *round);
 	return LastKnown;
 }
 
@@ -177,13 +183,118 @@ PlaceId *HvGetShortestPathTo(HunterView hv, Player hunter, PlaceId dest,
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	// breadth first search
 	// dijkstras algo
-	// find all locations that can be immediately reached by te player, add them toq ueue
+	// find all locations that can be immediately reached by the player, add them to queue
 	// keep track of distrance from src
 	// once we have found the destination, return
+	PlaceId *PreviousPlace = malloc(sizeof(PlaceId) * NUM_REAL_PLACES);
+	for (int i = 0; i < NUM_REAL_PLACES; i++) {
+		PreviousPlace[i] = NOWHERE;
+	}
+	int *DstFromOg = calloc(sizeof(int), NUM_REAL_PLACES);
+	int *Visited = calloc(sizeof(int), NUM_REAL_PLACES);
+	
+	Queue PlacesQueue = newQueue();
+
+	PlaceId currLoc = HvGetPlayerLocation(hv, hunter);
+	Visited[currLoc] = 1;
+
+	int counter = 0;		// keeps track of the processed cities
+	int addedLocLastCheck = 1;	// keeps track of the added cities
+	int RoundCount = 0;
+
+	// int addedLoc = 1;
+
+	PlaceId last = NOWHERE;
+	int addedCities = 0;
 
 	
-	*pathLength = 0;
-	return NULL;
+
+
+	// If the counter reaches the number of added cities, we move to the next round
+	QueueJoin(PlacesQueue, currLoc);
+	while(QueueIsEmpty(PlacesQueue) ==  false) {
+		// ToCheck is the place we are starting at
+		// will look at its connections and see where it can reach
+		 
+		
+		PlaceId ToCheck = QueueLeave(PlacesQueue);
+		addedLocLastCheck--;
+		counter++;
+		int numLocs;
+
+		PlaceId *reachable;
+
+		// Reachable is an array that shows all places a player can reach from their given location
+
+		int MaxDst = (hunter+HvGetRound(hv)+RoundCount)%4;
+
+		if (MaxDst == 0) {
+			reachable = GvGetReachableByType(hv->gv, hunter, HvGetRound(hv)+RoundCount, ToCheck, true, false, true, &numLocs);
+		} else {
+			reachable = GvGetReachable(hv->gv, hunter, HvGetRound(hv)+RoundCount, ToCheck, &numLocs);
+		}
+		addedCities += numLocs;
+
+		if (last == NOWHERE) {
+			// initialise last to a value
+			last = reachable[0];
+			printf("Last = %s\n", placeIdToName(last));
+		}
+		
+
+		if (last == ToCheck) {
+			last = lastIdInQueue(PlacesQueue);
+			RoundCount++;
+			printf("NumRoundsPassed = %d\n", RoundCount);
+		}
+
+		if (RoundCount > DstFromOg[dest] && Visited[dest] == 1) break;
+
+		for (int i = 0; i < numLocs ; i++) {
+			// we will loop through reachable, find all places they can arrive at anf fill out dijkstras algo
+			// the previopus place will be 'toCheck' and 
+			PlaceId temp = reachable[i];
+			printf("%s can reach %s\n", placeIdToName(ToCheck), placeIdToName(temp));
+			if (temp != ToCheck && Visited[temp] != 1) {
+				if (DstFromOg[temp] == 0 || DstFromOg[temp] > (DstFromOg[ToCheck] + 1)) {
+					QueueJoin(PlacesQueue, temp);
+					addedLocLastCheck++;
+					addedCities++;
+					// printf("faster to get to %s from %s than from %s\n", placeIdToName(temp), placeIdToName(ToCheck), placeIdToName(PreviousPlace[temp]));
+					PreviousPlace[temp] = ToCheck;
+					DstFromOg[temp] = DstFromOg[ToCheck] + 1;
+					Visited[temp] = 1;
+				}
+			}
+		}
+
+		// RoundCount++;
+		free(reachable);
+	}
+
+	PlaceId *ShortestPath = malloc(sizeof(PlaceId)* (DstFromOg[dest]));
+
+	PlaceId previous = dest;
+
+	printf("previous place from dest = %s\n", placeIdToName(PreviousPlace[dest]));
+
+	while (previous != currLoc) {
+		// printf("previous = %s\n", placeIdToName(previous));
+		ShortestPath[DstFromOg[previous]-1] = previous;
+		previous = PreviousPlace[previous];
+	}
+
+	free(PreviousPlace);
+	free(DstFromOg);
+	free(Visited);
+	
+	
+	*pathLength = DstFromOg[dest];
+	for (int i = 0; i < *pathLength; i++) {
+		printf("ShortestPath[%d] = %s\n", i, placeIdToName(ShortestPath[i]));
+	}
+	printf("pathLength = %d\n", *pathLength);
+	return ShortestPath;
 }
 
 ////////////////////////////////////////////////////////////////////////
