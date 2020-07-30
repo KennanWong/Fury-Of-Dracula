@@ -217,13 +217,9 @@ PlaceId *HvWhereCanIGo(HunterView hv, int *numReturnedLocs)
 	}
 
 	//Using MapGetConnection which gives a linked list of all the connections to that city
-	ConnList List = MapGetConnections(hv->map, CurrCityId);
-
-	//Transferring all of the places in List into HWCIG
-	while(List != NULL) {
-		HWCIG[(*numReturnedLocs)] = List->p;
-		List = List->next;
-		(*numReturnedLocs)++;
+	PlaceId *List = GvGetReachable(hv->gv,playerId,hv->round,CurrCityId,numReturnedLocs);
+	for(int i = 0; i < *numReturnedLocs; i++) {
+		HWCIG[i] = List[i];
 	}
 
 	return HWCIG;
@@ -258,31 +254,13 @@ PlaceId *HvWhereCanIGoByType(HunterView hv, bool road, bool rail,
 	
 	
 	//Transferring all of the places in List into HWCIGBT
-	for(ConnList List = MapGetConnections(hv->map, CurrCityId); List != NULL; List = List->next) {
-		//Checking if the curr location is possible
-		int possible = 0;
-		while(possible != 1) {
-			if(road == false) {
-				if(List->type == road) {
-					List = List->next;
-				} else possible = 1;
-			}
-			if(rail == false) {
-				if(List->type == rail) {
-					List = List->next;
-				} else possible = 1;
-			}
-			if(boat == false) {
-				if(List->type == boat) {
-					List = List->next;
-				} else possible = 1;
-			}
-			if(road == true && rail == true && boat == true) {
-				possible = 1;
-			}
-		}
-		HWCIGBT[(*numReturnedLocs)] = List->p;
-		List = List->next;
+	PlaceId *List = GvGetReachableByType(hv->gv,playerId,hv->round,CurrCityId,road,rail,boat,numReturnedLocs);
+	printf("Flag2\n");
+	//Transferring all of the places in List into HWCIGBT
+	int n = 0;
+	while(n < *numReturnedLocs) {
+		HWCIGBT[n] = List[n];
+		n++;
 	}
 
 	return HWCIGBT;
@@ -303,13 +281,12 @@ PlaceId *HvWhereCanTheyGo(HunterView hv, Player player,
 	}
 
 	//Using MapGetConnection which gives a linked list of all the connections to that city
-	
-
-	//Transferring all of the places in List into HWCTG
-	for(ConnList List = MapGetConnections(hv->map, CurrCityId); List != NULL; List = List->next) {
-		HWCTG[(*numReturnedLocs)] = List->p;
-		(*numReturnedLocs)++;
+	PlaceId *List = GvGetReachable(hv->gv,player,hv->round,CurrCityId,numReturnedLocs);
+	for(int i = 0; i < *numReturnedLocs; i++) {
+		HWCTG[i] = List[i];
 	}
+	//Transferring all of the places in List into HWCTG
+	
 
 	return HWCTG;
 }
