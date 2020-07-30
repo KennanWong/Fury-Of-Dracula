@@ -221,69 +221,6 @@ PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 
 PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
 {
-
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	PlaceId *wherecanigo = malloc(hv->round*sizeof(PlaceId));
-    int i = 0, n = 0, flag = 0;
-    bool hasVisited = false;
-
-    //checks to see if the current player is the dracula
-    if (player == PLAYER_DRACULA) {
-
-        //checks to see if a move has been made yet
-        if (dv->players[player]->pastPlays[n] != NULL) {
-            
-            //current location of the dracula
-            PlaceId currentlocation = DvGetPlayerLocation(dv, players[player]);
-            //all the connected locations to the current location
-            ConnList listofconnections = MapGetConnections(hv->map, currentlocation);
-
-			if (currentlocation == NOWHERE) {
-				flag = 1;
-			}
-
-            //if there is no location for the dracula to go to, it will teleport to Castle Dracula
-            if (listofconnections == NULL) {
-                flag = 1;
-            }
-
-            //if there is connected locations to the current location, enter loop
-            while (listofconnections != NULL) {
-
-                //gets the last 6 locations of the dracula (trail) to find the locations he cannot travel to
-                PlaceId* visitedList = GvGetLocationHistory(dv->gv, player, numReturnedLocs, canFree);
-
-                for (int j = 0; j < 5; i++) {
-                    if(listofconnetions == visitedList[j]) {
-                        hasVisited = true;
-                    }
-                }
-
-                //this loops through all the possible locations the dracula can travel to
-                //and inserts the locations into the array wherecanigo
-                if (hasVisited != true) {
-                    if ((listofconnections->type == ROAD) || (listofconnections->type == BOAT)) {
-                        wherecanigo[i] = listofconnections->p;
-                        //proceeds to go to the next node in the linked list consisting of locations in 
-                        //which dracula can travel to
-                        listofconnections = listofconnections->next;
-                        i++;
-                    }
-                }
-            }
-        }
-        flag = 1;
-
-        if (flag == 1) {
-            *numReturnedLocs = 0;
-            return NULL;
-        }
-
-    }
-    *numReturnedLocs = i;
-    return wherecanigo;
-
-
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	LocationID trail[TRAIL_SIZE] = {0};
 
@@ -380,7 +317,6 @@ PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
 PlaceId *DvWhereCanIGoByType(DraculaView dv, bool road, bool boat,
                              int *numReturnedLocs)
 {
-	
 	
 }
 
