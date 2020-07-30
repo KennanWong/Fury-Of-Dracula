@@ -77,6 +77,8 @@ bool ChecKIdinList(PlaceId *list, int numLocs, PlaceId id);
 
 void ShowPlaceIdList(PlaceId *list, int numLoc, char *name);
 
+PlaceId *ReturnTrailAtRound(GameView gv, Round round, int *DcNumReturnedLoc, bool *canFree);
+
 ////////////////////////////////////////////////////////////////////////
 // Constructor/Destructor
 
@@ -319,29 +321,31 @@ PlaceId *GvGetLocationHistory(GameView gv, Player player,
 			mCounter++;
 			*/
 			PlaceId LId = CityIdFromMove(gv->PastPlaysArray[i]);
+			
 			if (pInitial == 'D') {
 				// if we processing dracular
 				if (LId > MAX_REAL_PLACE) {
+
 					// move is either double back or hide
 					if (LId == HIDE) {
 						LId = GGLH[LCounter-1];
 					} else if (LId >= DOUBLE_BACK_1) {
 						int DBval = LId - HIDE;
 						LId = GGLH[LCounter-DBval];
-						
 					}
-				}
-
+				}	
 			}
 			GGLH[LCounter] = LId;
+			
 			
 			LCounter++;
 		}
 	}
 	
 	*numReturnedLocs = gv->players[player]->numTurns;
+	
 	*canFree = false;
-
+	
 	return GGLH;
 }
 
@@ -408,8 +412,8 @@ PlaceId *GvGetReachable(GameView gv, Player player, Round round,
 	// 
 	
 	int maxDst = (round + player)%4;
-	printf("this is round number %d\n", round);
-	printf("maxDistance player can travel = %d\n", (round+player)%4);
+	// printf("this is round number %d\n", round);
+	// printf("maxDistance player can travel = %d\n", (round+player)%4);
 	for (ConnList curr = MapGetConnections(gv->map, from); curr != NULL; curr = curr->next) {
 		// the hunter can go to an adjacent city by road, boat or rail
 		if (player != PLAYER_DRACULA) { 
@@ -458,16 +462,15 @@ PlaceId *GvGetReachable(GameView gv, Player player, Round round,
 					hasVisited = true;
 				}
 			}
-			
 			if (hasVisited != true) {
 				if (curr->type == ROAD) {
-					idList = realloc(idList, (*numReturnedLocs + 1) * sizeof(*idList));
+					// idList = realloc(idList, (*numReturnedLocs + 1) * sizeof(*idList));
 					idList[(*numReturnedLocs)] = curr->p;
 					(*numReturnedLocs)++;
 				}
 
 				if (curr->type == BOAT) {
-					idList = realloc(idList, (*numReturnedLocs + 1) * sizeof(*idList));
+					// idList = realloc(idList, (*numReturnedLocs + 1) * sizeof(*idList));
 					idList[(*numReturnedLocs)] = curr->p;
 					(*numReturnedLocs)++;
 				}
@@ -490,7 +493,7 @@ PlaceId *GvGetReachableByType(GameView gv, Player player, Round round,
 	PlaceId* idList = malloc(sizeof(PlaceId)*NUM_REAL_PLACES);
 	*numReturnedLocs = 0;
 	int maxDst = (round + player)%4;
-	printf("maxDistance player can travel = %d\n", (round+player)%4);
+	// printf("maxDistance player can travel = %d\n", (round+player)%4);
 	// MapShow(gv->map);
 	for (ConnList curr = MapGetConnections(gv->map, from); curr != NULL; curr = curr->next) {
 		// the hunter can go to an adjacent city by road, boat or rail
@@ -538,32 +541,35 @@ PlaceId *GvGetReachableByType(GameView gv, Player player, Round round,
 		}
 
 		// dracula can only go by road to boat. 
-		bool *canFree = false;
+		bool canFree;
 		bool hasVisited = false;
-
+		
 		if (player == PLAYER_DRACULA) {
 			// check if dracula has already visited the location.
-			PlaceId* visitedList = GvGetLocationHistory(gv, player, numReturnedLocs, canFree);
+			int numPlaces = 0;
+			PlaceId* visitedList = GvGetLocationHistory(gv, player, &numPlaces, &canFree);
+			
 			// if location already visited set hasVisited to true. 
-			for (int i = 0; i < 5; i++) {
-				if(GvGetPlayerLocation(gv, player) == visitedList[i]) {
+			for (int i = 0; i < numPlaces; i++) {
+				if(curr->p == visitedList[i]) {
 					hasVisited = true;
 				}
 			}
-
+			
 			if (hasVisited != true) {
-				if (curr->type == ROAD && road == true) {
-					idList = realloc(idList, (*numReturnedLocs + 1) * sizeof(*idList));
+				if (curr->type == ROAD && road == true && curr->p != ST_JOSEPH_AND_ST_MARY) {
+					// idList = realloc(idList, (*numReturnedLocs + 1) * sizeof(*idList));
 					idList[(*numReturnedLocs)] = curr->p;
 					(*numReturnedLocs)++;
 				}
-
-				if (curr->type == BOAT && boat == true) {
-					idList = realloc(idList, (*numReturnedLocs + 1) * sizeof(*idList));
+				if (curr->type == BOAT && boat == true && curr->p != ST_JOSEPH_AND_ST_MARY) {
+					// idList = realloc(idList, (*numReturnedLocs + 1) * sizeof(*idList));
 					idList[(*numReturnedLocs)] = curr->p;
 					(*numReturnedLocs)++;
 				}
 			}
+			
+			free(visitedList);
 		} 
 	}
 	if (ChecKIdinList(idList, (*numReturnedLocs), from) == false) {
@@ -571,12 +577,12 @@ PlaceId *GvGetReachableByType(GameView gv, Player player, Round round,
 		(*numReturnedLocs)++;
 	}
 	// For debugging
-	
+	/*
 	printf("returned locations = %d\n", (*numReturnedLocs));
 	for (int i = 0; i < (*numReturnedLocs); i++) {
 		printf("idList[%d] = %s\n", i, placeIdToName(idList[i]));
 	}
-	
+	*/
 	return idList;
 }
 
@@ -720,6 +726,22 @@ void MatureVampire(GameView gv) {
 }
 
 
+void showPastPlaysArray(GameView gv) {
+	for (int i = 0; i < gv->turnCounter; i++) {
+		printf("PastPlaysArray[i] = %s\n", gv->PastPlaysArray[i]);
+	}
+}
+
+
+bool ChecKIdinList(PlaceId *list, int numLocs, PlaceId id) {
+	for (int i = 0; i< numLocs; i++) {
+		if (list[i] == id) {
+			return true;
+		}
+	}
+
+	return false;
+}
 
 // From a given round number, return trail array
 PlaceId *ReturnTrailAtRound(GameView gv, Round round, int *DcNumReturnedLoc, bool *canFree) {
@@ -744,22 +766,6 @@ PlaceId *ReturnTrailAtRound(GameView gv, Round round, int *DcNumReturnedLoc, boo
 	}
 	return ReturnedTrailArray;
 }
-void showPastPlaysArray(GameView gv) {
-	for (int i = 0; i < gv->turnCounter; i++) {
-		printf("PastPlaysArray[i] = %s\n", gv->PastPlaysArray[i]);
-	}
-}
-
-
-bool ChecKIdinList(PlaceId *list, int numLocs, PlaceId id) {
-	for (int i = 0; i < numLocs; i++) {
-		if (list[i] == id) {
-			return true;
-		}
-	}
-	return false;
-}
-
 
 void ShowPlaceIdList(PlaceId *list, int numLoc, char *name) {
 	for (int i = 0; i < numLoc; i++) {

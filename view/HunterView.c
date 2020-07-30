@@ -238,14 +238,14 @@ PlaceId *HvGetShortestPathTo(HunterView hv, Player hunter, PlaceId dest,
 		if (last == NOWHERE) {
 			// initialise last to a value
 			last = reachable[0];
-			printf("Last = %s\n", placeIdToName(last));
+			// printf("Last = %s\n", placeIdToName(last));
 		}
 		
 
 		if (last == ToCheck) {
 			last = lastIdInQueue(PlacesQueue);
 			RoundCount++;
-			printf("NumRoundsPassed = %d\n", RoundCount);
+			// printf("NumRoundsPassed = %d\n", RoundCount);
 		}
 
 		if (RoundCount > DstFromOg[dest] && Visited[dest] == 1) break;
@@ -254,7 +254,7 @@ PlaceId *HvGetShortestPathTo(HunterView hv, Player hunter, PlaceId dest,
 			// we will loop through reachable, find all places they can arrive at anf fill out dijkstras algo
 			// the previopus place will be 'toCheck' and 
 			PlaceId temp = reachable[i];
-			printf("%s can reach %s\n", placeIdToName(ToCheck), placeIdToName(temp));
+			// printf("%s can reach %s\n", placeIdToName(ToCheck), placeIdToName(temp));
 			if (temp != ToCheck && Visited[temp] != 1) {
 				if (DstFromOg[temp] == 0 || DstFromOg[temp] > (DstFromOg[ToCheck] + 1)) {
 					QueueJoin(PlacesQueue, temp);
@@ -276,7 +276,7 @@ PlaceId *HvGetShortestPathTo(HunterView hv, Player hunter, PlaceId dest,
 
 	PlaceId previous = dest;
 
-	printf("previous place from dest = %s\n", placeIdToName(PreviousPlace[dest]));
+	// printf("previous place from dest = %s\n", placeIdToName(PreviousPlace[dest]));
 
 	while (previous != currLoc) {
 		// printf("previous = %s\n", placeIdToName(previous));
@@ -293,7 +293,7 @@ PlaceId *HvGetShortestPathTo(HunterView hv, Player hunter, PlaceId dest,
 	for (int i = 0; i < *pathLength; i++) {
 		printf("ShortestPath[%d] = %s\n", i, placeIdToName(ShortestPath[i]));
 	}
-	printf("pathLength = %d\n", *pathLength);
+	// printf("pathLength = %d\n", *pathLength);
 	return ShortestPath;
 }
 
@@ -303,24 +303,81 @@ PlaceId *HvGetShortestPathTo(HunterView hv, Player hunter, PlaceId dest,
 PlaceId *HvWhereCanIGo(HunterView hv, int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	PlaceId *HWCIG = malloc(hv->round*sizeof(PlaceId));
 	*numReturnedLocs = 0;
-	return NULL;
+	//Calculating the player we are right now
+	Player playerId = HvGetPlayer(hv);
+
+	//Defining the current location of the player given as CurrCityId
+	PlaceId CurrCityId = GvGetPlayerLocation(hv->gv, playerId);
+
+	//If the player is currently NOWHERE i.e hasn't made a move, return NULL
+	if(CurrCityId == NOWHERE) {	
+		return NULL;
+	}
+
+	//Using MapGetConnection which gives a linked list of all the connections to that city
+	PlaceId *List = GvGetReachable(hv->gv,playerId,hv->round,CurrCityId,numReturnedLocs);
+	for(int i = 0; i < *numReturnedLocs; i++) {
+		HWCIG[i] = List[i];
+	}
+
+	return HWCIG;
 }
 
 PlaceId *HvWhereCanIGoByType(HunterView hv, bool road, bool rail,
                              bool boat, int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numReturnedLocs = 0;
-	return NULL;
+	PlaceId *HWCIGBT = malloc(hv->round*sizeof(PlaceId));
+
+	Player playerId = HvGetPlayer(hv);
+
+	//Defining the current location of the player given as CurrCityId
+	PlaceId CurrCityId = GvGetPlayerLocation(hv->gv, playerId);
+
+	//If the player is currently NOWHERE i.e hasn't made a move, return NULL
+	if(CurrCityId == NOWHERE) {
+		return NULL;
+	}
+	
+	
+	//Transferring all of the places in List into HWCIGBT
+	PlaceId *List = GvGetReachableByType(hv->gv,playerId,hv->round,CurrCityId,road,rail,boat,numReturnedLocs);
+	printf("Flag2\n");
+	//Transferring all of the places in List into HWCIGBT
+	int n = 0;
+	while(n < *numReturnedLocs) {
+		HWCIGBT[n] = List[n];
+		n++;
+	}
+
+	return HWCIGBT;
 }
 
 PlaceId *HvWhereCanTheyGo(HunterView hv, Player player,
                           int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	PlaceId *HWCTG = malloc(hv->round*sizeof(PlaceId));
 	*numReturnedLocs = 0;
-	return NULL;
+	//Defining the current location of the player given as CurrCityId
+	PlaceId CurrCityId = GvGetPlayerLocation(hv->gv, player);
+
+	//If the player is currently NOWHERE i.e hasn't made a move, return NULL
+	if(CurrCityId == NOWHERE) {
+		return NULL;
+	}
+
+	//Using MapGetConnection which gives a linked list of all the connections to that city
+	PlaceId *List = GvGetReachable(hv->gv,player,hv->round,CurrCityId,numReturnedLocs);
+	for(int i = 0; i < *numReturnedLocs; i++) {
+		HWCTG[i] = List[i];
+	}
+	//Transferring all of the places in List into HWCTG
+	free(List);
+
+	return HWCTG;
 }
 
 PlaceId *HvWhereCanTheyGoByType(HunterView hv, Player player,
@@ -328,8 +385,27 @@ PlaceId *HvWhereCanTheyGoByType(HunterView hv, Player player,
                                 int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	PlaceId *HWCTGBT = malloc(hv->round*sizeof(PlaceId));
 	*numReturnedLocs = 0;
-	return NULL;
+	//Defining the current location of the player given as CurrCityId
+	PlaceId CurrCityId = GvGetPlayerLocation(hv->gv, player);
+	//If the player is currently NOWHERE i.e hasn't made a move, return NULL
+	if(CurrCityId == NOWHERE) {
+		return NULL;
+	}
+	
+	PlaceId *List = GvGetReachableByType(hv->gv,player,hv->round,CurrCityId,road,rail,boat, numReturnedLocs);
+	
+	//Transferring all of the places in List into HWCIGBT
+	int i = 0;
+	while(i < *numReturnedLocs) {
+		HWCTGBT[i] = List[i];
+		printf("HWCTGBT[%d] = %s\n", i, placeIdToName(HWCTGBT[i]));
+		i++;
+	}
+	printf("numReturnedLocs after GvGetReachablebyType is %d\n",*numReturnedLocs);
+	free(List);
+	return HWCTGBT;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -466,3 +542,4 @@ void HvMatureVampire(HunterView hv) {
 PlaceId HunterEncounters(HunterView hv, Players player, Players Dracula) {
 	return NOWHERE;
 }
+
