@@ -327,6 +327,7 @@ PlaceId *HvWhereCanTheyGoByType(HunterView hv, Player player,
 	if(CurrCityId == NOWHERE) {
 		return NULL;
 	}
+	printf("numReturnedLocs before GvGetReachablebyType is %d\n",(*numReturnedLocs));
 	printf("Flag1\n");
 	printf("%d\n",CurrCityId);
 	PlaceId *List = GvGetReachableByType(hv->gv,player,hv->round,CurrCityId,road,rail,boat,numReturnedLocs);
@@ -337,7 +338,7 @@ PlaceId *HvWhereCanTheyGoByType(HunterView hv, Player player,
 		HWCTGBT[i] = List[i];
 		i++;
 	}
-	printf("%d",*numReturnedLocs);
+	printf("numReturnedLocs after GvGetReachablebyType is %d\n",*numReturnedLocs);
 	return HWCTGBT;
 }
 

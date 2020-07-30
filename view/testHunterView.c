@@ -403,7 +403,7 @@ int main(void)
 		int numLocs = -1;
 		PlaceId *locs = HvWhereCanTheyGoByType(hv, PLAYER_LORD_GODALMING,
 		                                       false, true, false, &numLocs);
-		
+		printf("numLocs is %d",numLocs);
 		assert(numLocs == 5);
 		sortPlaces(locs, numLocs);
 		assert(locs[0] == BORDEAUX);
