@@ -164,8 +164,8 @@ PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
 		flag = 1;
 	}
 	
-	int hide = FALSE;
-	int doubleback = FALSE;
+	int hide = 0;
+	int doubleback = 0;
 	while (listofconnections != NULL) {
 
 		//checks to see if trail or double back is in the trail
@@ -174,18 +174,18 @@ PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
 		while (i < TRAIL_SIZE) {
 			if(trail[i] == DOUBLE_BACK_1 || trail[i] == DOUBLE_BACK_2 || trail[i] == DOUBLE_BACK_3 ||
 			trail[i] == DOUBLE_BACK_4 ||trail[i] == DOUBLE_BACK_5) {
-				doubleback = TRUE;
+				doubleback = 1;
 			}
 
 			if(trail[i] == HIDE) {
-				hide = TRUE;
+				hide = 1;
 			}
 			i++;
 		}
 
 		//incrememnts count everytime a possible location the dracula can travel to is also the same location
 		//which is present in trail
-		if(doubleback == TRUE){
+		if(doubleback == 1){
 			for(int d = 0; d < TRAIL_SIZE; d++){
 				for(int k = 0; k < size; k++){
 					if(trail[d] == listofconnections[k]){
@@ -198,7 +198,7 @@ PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
 
 		//incrememnts count everytime a possible location the dracula can travel to is also the same location
 		//which is present in trail
-		if(hide == TRUE){
+		if(hide == 1){
 			for(int p = 0; p < size; p++){
 				if(listofconnections[p] == draclocation){
 					listofconnections[p] = -1;
@@ -372,7 +372,7 @@ void DvActionFromMove(char *str, char *action) {
 
 void DvProcessDracula(DraculaView dv, char *move) {
 	// Process movement
-	Players *Dracula = hv->players[PLAYER_DRACULA];
+	Players *Dracula = dv->players[PLAYER_DRACULA];
 	PlaceId currLoc = DvCityIdFromMove(move);
 	if (move[1] == 'D') {
 		/*
