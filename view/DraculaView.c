@@ -29,7 +29,7 @@ typedef struct{
 }Players;
 
 struct draculaView {
-	GameView gv
+	GameView gv;
 	Map map;
 	int CurrentScore;
 	Round round;
@@ -418,8 +418,25 @@ PlaceId *DvWhereCanTheyGo(DraculaView dv, Player player,
                           int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	PlaceId *idList = malloc(dv->round*sizeof(PlaceId));
 	*numReturnedLocs = 0;
-	return NULL;
+	//Defining the current location of the player given as CurrCityId
+	PlaceId CurrCityId = GvGetPlayerLocation(dv->gv, player);
+
+	//If the player is currently NOWHERE i.e hasn't made a move, return NULL
+	if(CurrCityId == NOWHERE) {
+		return NULL;
+	}
+
+	//Using MapGetConnection which gives a linked list of all the connections to that city
+	PlaceId *list = GvGetReachable(dv->gv,player,dv->round,CurrCityId,numReturnedLocs);
+	for(int i = 0; i < *numReturnedLocs; i++) {
+		idList[i] = list[i];
+	}
+	//Transferring all of the places in List into idList
+	
+
+	return idList;
 }
 
 
@@ -428,8 +445,27 @@ PlaceId *DvWhereCanTheyGoByType(DraculaView dv, Player player,
                                 int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	PlaceId *idList = malloc(dv->round*sizeof(PlaceId));
 	*numReturnedLocs = 0;
-	return NULL;
+	//Defining the current location of the player given as CurrCityId
+	PlaceId CurrCityId = GvGetPlayerLocation(dv->gv, player);
+	//If the player is currently NOWHERE i.e hasn't made a move, return NULL
+	if(CurrCityId == NOWHERE) {
+		return NULL;
+	}
+	printf("numReturnedLocs before GvGetReachablebyType is %d\n",(*numReturnedLocs));
+	printf("Flag1\n");
+	printf("%d\n",CurrCityId);
+	PlaceId *list = GvGetReachableByType(dv->gv,player,dv->round,CurrCityId,road,rail,boat,numReturnedLocs);
+	printf("Flag2\n");
+	//Transferring all of the places in List into HWCIGBT
+	int i = 0;
+	while(i < *numReturnedLocs) {
+		idList[i] = list[i];
+		i++;
+	}
+	printf("numReturnedLocs after GvGetReachablebyType is %d\n",*numReturnedLocs);
+	return idList;
 }
 
 

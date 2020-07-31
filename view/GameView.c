@@ -19,12 +19,8 @@
 #include "Map.h"
 #include "Places.h"
 #include "Queue.h"
-// add your own #includes here
 
 #include "string.h"
-// TODO: ADD YOUR OWN STRUCTS HERE
-
-
 
 typedef struct{
 	Player player;
@@ -45,8 +41,6 @@ struct gameView {
 	int RoundOfVampire;
 	PlaceId VampireLocation;
 	char **PastPlaysArray;
-
-	// TODO: ADD FIELDS HERE
 };
 
 ////////////////////////////////////////////////////////////////////////
@@ -61,17 +55,16 @@ void ActionFromMove(char *str, char *action);
 // Processes Draculas actions
 void ProcessDracula(GameView gv, char *move);
 
-
+// Processes Hunters actions
 void ProcessHunter(GameView gv, char *move, Players *player);
 
-
+// Vampire has matured, remove from GameScore
 void MatureVampire(GameView gv);
 
-
+// Shows PastPlaysArray
 void showPastPlaysArray(GameView gv);
 
-
-
+// Checks the PlacId in the list
 bool ChecKIdinList(PlaceId *list, int numLocs, PlaceId id);
 
 

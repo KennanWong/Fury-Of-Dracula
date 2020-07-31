@@ -92,6 +92,7 @@ int main(void)
 		assert(GvGetPlayerLocation(gv, PLAYER_DRACULA) == NOWHERE);
 
 		GvFree(gv);
+		printf("Message is shown as %s",messages[1]);
 		printf("Test passed!\n");
 	}
 
