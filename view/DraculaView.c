@@ -248,10 +248,10 @@ PlaceId *DvWhereCanIGoByType(DraculaView dv, bool road, bool boat,
 	//all the connected locations to the current location
 	PlaceId listofconnections = GvGetReachableByType(dv->gv,PLAYER_DRACULA,dv->round,draclocation, road, 0, boat, numReturnedLocs);
 
-	int size = *numLocations;
+	int size = *numReturnedLocs;
 	int invalid = 0;
-	int hide = FALSE;
-	int doubleback = FALSE;
+	int hide = 0;
+	int doubleback = 0;
 	int flag = 0;
 	//if there is no location for the dracula to go to, it will teleport to Castle Dracula
 	
@@ -272,18 +272,18 @@ PlaceId *DvWhereCanIGoByType(DraculaView dv, bool road, bool boat,
 		while (i < TRAIL_SIZE) {
 			if(trail[i] == DOUBLE_BACK_1 || trail[i] == DOUBLE_BACK_2 || trail[i] == DOUBLE_BACK_3 ||
 			trail[i] == DOUBLE_BACK_4 ||trail[i] == DOUBLE_BACK_5) {
-				doubleback = TRUE;
+				doubleback = 1;
 			}
 
 			if(trail[i] == HIDE) {
-				hide = TRUE;
+				hide = 1;
 			}
 			i++;
 		}
 
 		//incrememnts count everytime a possible location the dracula can travel to is also the same location
 		//which is present in trail
-		if(doubleback == TRUE){
+		if(doubleback == 1){
 			for(int d = 0; d < TRAIL_SIZE; d++){
 				for(int k = 0; k < size; k++){
 					if(trail[d] == listofconnections[k]){
@@ -296,7 +296,7 @@ PlaceId *DvWhereCanIGoByType(DraculaView dv, bool road, bool boat,
 
 		//incrememnts count everytime a possible location the dracula can travel to is also the same location
 		//which is present in trail
-		if(hide == TRUE){
+		if(hide == 1){
 			for(int p = 0; p < size; p++){
 				if(listofconnections[p] == draclocation){
 					listofconnections[p] = -1;
@@ -306,11 +306,11 @@ PlaceId *DvWhereCanIGoByType(DraculaView dv, bool road, bool boat,
 		}
 
 		//the real amount of locations the dracula can travel to after adapting to dracula restrictions
-		*numLocations = size - invalid;
-		PlaceId *newconnections = malloc(sizeof(PlaceId) * (*numLocations));
+		*numReturnedLocs = size - invalid;
+		PlaceId *newconnections = malloc(sizeof(PlaceId) * (*numReturnedLocs));
 
 		int l = 0, m = 0;
-		while(l < numLocations) {
+		while(l < numReturnedLocs) {
 			if(listofconnections[m] != -1){
 				if ((listofconnections->type == ROAD) || (listofconnections->type == BOAT)) {
 					newconnections[l] = listofconnections[m];
