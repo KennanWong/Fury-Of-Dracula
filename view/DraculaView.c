@@ -208,11 +208,11 @@ PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
 		}
 
 		//the real amount of locations the dracula can travel to after adapting to dracula restrictions
-		*numLocations = size - invalid;
-		PlaceId *newconnections = malloc(sizeof(PlaceId) * (*numLocations));
+		*numReturnedLocs = size - invalid;
+		PlaceId *newconnections = malloc(sizeof(PlaceId) * (*numReturnedLocs));
 
 		int l = 0, m = 0;
-		while(l < numLocations) {
+		while(l < numReturnedLocs) {
 			if(listofconnections[m] != -1){
 				if ((listofconnections->type == ROAD) || (listofconnections->type == BOAT)) {
 					newconnections[l] = listofconnections[m];
