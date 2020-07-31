@@ -166,5 +166,27 @@ int main(void)
 		DvFree(dv);
 	}
 
+{///////////////////////////////////////////////////////////////////
+	
+		printf("Checking Galatz road connections\n");
+		char *trail = "GGA....";
+
+		Message messages[1] = {"Gone to Galatz"};
+		DraculaView dv = DvNew(trail, messages);
+		
+		int numLocs = -1;
+		PlaceId *locs = DvWhereCanIGo(dv, &numLocs);
+
+		assert(numLocs == 4);
+		sortPlaces(locs, numLocs);
+		assert(locs[0] == BELGRADE);
+		assert(locs[1] == CONSTANTA);
+		assert(locs[2] == GALATZ);
+		assert(locs[3] == SOFIA);
+		free(locs);
+		
+		printf("Test passed!\n");
+		DvFree(dv);
+	}
 	return EXIT_SUCCESS;
 }

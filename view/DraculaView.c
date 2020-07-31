@@ -134,6 +134,7 @@ PlaceId *DvGetTrapLocations(DraculaView dv, int *numTraps)
 
 PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 {
+	/*
 	PlaceId *idList = malloc(dv->round*sizeof(PlaceId));
 	*numReturnedMoves = 0;
 
@@ -144,7 +145,7 @@ PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 		return NULL;
 	}
 
-	/*
+	
 	PlaceId *list = GvGetReachable(dv->gv,player,dv->round,draclocation,numReturnedMoves);
 	for(int i = 0; i < *numReturnedMoves; i++) {
 		idList[i] = list[i];
@@ -152,6 +153,7 @@ PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 
 	return idList;
 	*/
+	return NULL;
 }
 
 PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
