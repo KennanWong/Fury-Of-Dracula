@@ -133,8 +133,96 @@ PlaceId *DvGetTrapLocations(DraculaView dv, int *numTraps)
 
 PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	PlaceId trail[TRAIL_SIZE] = {0};
+
+	//gets the last 6 locations of the dracula (trail)
+	PlaceId* visitedList = draculatrail(dv, PLAYER_DRACULA, trail[TRAIL_SIZE]);
+
+	//current location of dracula
+	PlaceId draclocation = DvGetPlayerLocation(dv, PLAYER_DRACULA);
+
+	//all the connected locations to the current location
+	PlaceId listofconnections = GvGetReachable(dv->gv,PLAYER_DRACULA,dv->round,draclocation,numReturnedLocs);
+
+	int size = *numReturnedLocs;
+	int invalid = 0;
+
+	//if there is no location for the dracula to go to, it will teleport to Castle Dracula
+	int flag = 0;
+	if (draclocation == NOWHERE) {
+		flag = 1;
+	} 
 	
+	if (listofconnections == NULL) {
+		flag = 1;
+	}
+	
+	int hide = 0;
+	int doubleback = 0;
+	while (listofconnections != NULL) {
+
+		//checks to see if trail or double back is in the trail
+		//if it is present, marks either doubleback or hide as true as these are locations that cannot be accessed now
+		int i = 0;
+		while (i < TRAIL_SIZE) {
+			if(trail[i] == DOUBLE_BACK_1 || trail[i] == DOUBLE_BACK_2 || trail[i] == DOUBLE_BACK_3 ||
+			trail[i] == DOUBLE_BACK_4 ||trail[i] == DOUBLE_BACK_5) {
+				doubleback = 1;
+			}
+
+			if(trail[i] == HIDE) {
+				hide = 1;
+			}
+			i++;
+		}
+
+		//incrememnts count everytime a possible location the dracula can travel to is also the same location
+		//which is present in trail
+		if(doubleback == 1){
+			for(int d = 0; d < TRAIL_SIZE; d++){
+				for(int k = 0; k < size; k++){
+					if(trail[d] == listofconnections[k]){
+						invalid++;
+						listofconnections[k] = -1;
+					}
+				}
+			}
+		}
+
+		//incrememnts count everytime a possible location the dracula can travel to is also the same location
+		//which is present in trail
+		if(hide == 1){
+			for(int p = 0; p < size; p++){
+				if(listofconnections[p] == draclocation){
+					listofconnections[p] = -1;
+					invalid++;
+				}
+			}
+		}
+
+		//the real amount of locations the dracula can travel to after adapting to dracula restrictions
+		*numReturnedLocs = size - invalid;
+		PlaceId *newconnections = malloc(sizeof(PlaceId) * (*numReturnedLocs));
+
+		int l = 0, m = 0;
+		while(l < numReturnedLocs) {
+			if(listofconnections[m] != -1){
+				if ((listofconnections->type == ROAD) || (listofconnections->type == BOAT)) {
+					newconnections[l] = listofconnections[m];
+					l++;
+				}
+			}
+			m++;
+		}
+	}
+
+	if (flag == 1) {
+		*numReturnedLocs = 0;
+		return NULL;
+	}
+
+	return newconnections;
+
 }
 
 PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
@@ -373,31 +461,40 @@ void DvActionFromMove(char *str, char *action) {
 void DvProcessDracula(DraculaView dv, char *move) {
 	// Process movement
 	Players *Dracula = dv->players[PLAYER_DRACULA];
-	PlaceId currLoc = DvCityIdFromMove(move);
+	PlaceId currLoc = CityIdFromMove(move);
+	
 	if (move[1] == 'D') {
-		/*
-		// Dracula has double backed
-		// need to get list of previous locations
-		int NumRetrunedLocations;
-		bool canFree = true;
-		PlaceId *DraculaTrail = malloc(7*sizeof(PlaceId));
-		DraculaTrail = HvGetLastLocations(hv, Dracula->player, 7, &NumRetrunedLocations, &canFree);
-		if ((move[2] - '0') < NumRetrunedLocations) {
-			currLoc = DraculaTrail[move[2] - '0'];
-		}
 		
-		free(DraculaTrail);
-		*/
+		int DBval = move[2] - '0';
+		
+		currLoc = CityIdFromMove(dv->gv->PastPlaysArray[dv->turnCounter - DBval*5]);
+		
 	} else if (currLoc == HIDE) {
 		currLoc = Dracula->currLoc;
-	} else if (placeIdToType(currLoc) == SEA) {
+		
+	} 
+
+	if (currLoc >= HIDE) {
+		// double backed to a hide move for example, find the most recent location
+		int i  = 0;
+		while (currLoc >= HIDE) {
+			currLoc = CityIdFromMove(dv->PastPlaysArray[dv->turnCounter - i*5]);
+			i++;
+		}
+	}
+
+	if (placeIdToType(currLoc) == SEA) {
 		dv->players[PLAYER_DRACULA]->health = dv->players[PLAYER_DRACULA]->health - LIFE_LOSS_SEA;
 	}
 	Dracula->currLoc = currLoc;
 
+	if (currLoc == CASTLE_DRACULA) {
+		Dracula->health = Dracula->health + LIFE_GAIN_CASTLE_DRACULA;
+	}
+
 	// Process action
 	char action[4];
-	HvActionFromMove(move, action);
+	ActionFromMove(move, action);
 	if (action[0] == 'T') {
 		// Add trap to location
 		//printf("adding trap\n");
@@ -412,30 +509,22 @@ void DvProcessDracula(DraculaView dv, char *move) {
 		dv->RoundOfVampire = dv->round;
 	}
 	if (action[2] == 'M') {
-		// Remove a trap
-		/*
-		int NumRetrunedLocations;
-		bool canFree = true;
-		PlaceId *DraculaTrail = malloc(8*sizeof(PlaceId));
-		DraculaTrail = GvGetLastLocations(hv, hv->players[PLAYER_DRACULA]->player, 7, &NumRetrunedLocations, &canFree);
-		if (NumRetrunedLocations == 7) {
-			RemoveTrapsFromLoc(DraculaTrail[6], hv->map);
-		}
-		free(DraculaTrail);
-		*/
+		// Remove a trap that has malfunction as it has left the trail
+		RemoveTrapFromLoc(CityIdFromMove(dv->PastPlaysArray[gv->turnCounter - 30]), dv->map);
 	} else if (action[2] == 'V') {
 		// Mature Vamp
 		DvMatureVampire(dv);
 	}
+	
 }
 
 // Resets the vampire
 void DvMatureVampire(DraculaView dv) {
 	RemoveVampireFromLoc(dv->VampireLocation, dv->map);
-	dv->gv->CurrentScore = dv->gv->CurrentScore - SCORE_LOSS_VAMPIRE_MATURES;
-	dv->gv->VampireLocation = NOWHERE;
-	dv->gv->VampireStatus = 10;
-	dv->gv->RoundOfVampire = -1;
+	dv->CurrentScore = dv->CurrentScore - SCORE_LOSS_VAMPIRE_MATURES;
+	dv->VampireLocation = NOWHERE;
+	dv->VampireStatus = 10;
+	dv->RoundOfVampire = -1;
 }
 
 void draculatrail(DraculaView dv, Player player, PlaceId trail[TRAIL_SIZE]) {
@@ -471,4 +560,27 @@ void draculatrail(DraculaView dv, Player player, PlaceId trail[TRAIL_SIZE]) {
 				}
 			}
 		}
+}
+
+void *ReturnTrailAtRound(DraculaView dv, Round round, int *DcNumReturnedLoc, bool *canFree) {
+	PlaceId *DraculasTrail = GvGetLocationHistory(dv->gv, PLAYER_DRACULA, DcNumReturnedLoc,  canFree);
+	PlaceId *ReturnedTrailArray = malloc(sizeof(*ReturnedTrailArray));
+	
+	// if DnumReturnedLoc < round num, then we can only take up to DnumReturnedLoc
+	// also if roundNum > 6; we can only take the first six
+
+	if (*DcNumReturnedLoc < 6) {
+		for (int i = 0; i < *DcNumReturnedLoc; i++) {
+			ReturnedTrailArray[i] = DraculasTrail[i];
+		}	
+	} else {
+		for (int i = 0; (round - 6 + i) < round; i++) {
+			ReturnedTrailArray[i] = DraculasTrail[round- 6 + i];
+		}
+		*DcNumReturnedLoc = 6;
+	}
+	if (canFree) {
+		free(DraculasTrail);
+	}
+	return ReturnedTrailArray;
 }
