@@ -461,18 +461,18 @@ PlaceId *DvWhereCanTheyGoByType(DraculaView dv, Player player,
 	if(CurrCityId == NOWHERE) {
 		return NULL;
 	}
-	printf("numReturnedLocs before GvGetReachablebyType is %d\n",(*numReturnedLocs));
-	printf("Flag1\n");
-	printf("%d\n",CurrCityId);
+	// printf("numReturnedLocs before GvGetReachablebyType is %d\n",(*numReturnedLocs));
+	// printf("Flag1\n");
+	// printf("%d\n",CurrCityId);
 	PlaceId *list = GvGetReachableByType(dv->gv,player,dv->round,CurrCityId,road,rail,boat,numReturnedLocs);
-	printf("Flag2\n");
+	// printf("Flag2\n");
 	//Transferring all of the places in List into HWCIGBT
 	int i = 0;
 	while(i < *numReturnedLocs) {
 		idList[i] = list[i];
 		i++;
 	}
-	printf("numReturnedLocs after GvGetReachablebyType is %d\n",*numReturnedLocs);
+	// printf("numReturnedLocs after GvGetReachablebyType is %d\n",*numReturnedLocs);
 	return idList;
 }
 
