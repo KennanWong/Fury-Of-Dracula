@@ -51,13 +51,13 @@ struct draculaView {
 DraculaView DvNew(char *pastPlays, Message messages[])
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	DraculaView new = malloc(sizeof(*new));
-	if (new == NULL) {
+	DraculaView dv = malloc(sizeof(*dv));
+	if (dv == NULL) {
 		fprintf(stderr, "Couldn't allocate DraculaView\n");
 		exit(EXIT_FAILURE);
 	}
-
-	return new;
+	dv->gv = GvNew(pastPlays, messages);
+	return dv;
 }
 
 void DvFree(DraculaView dv)
