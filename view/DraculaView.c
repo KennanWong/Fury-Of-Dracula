@@ -18,10 +18,10 @@
 #include "Game.h"
 #include "GameView.h"
 #include "Map.h"
+#include "Places.h"
+
 // add your own #includes here
-
 // TODO: ADD YOUR OWN STRUCTS HERE
-
 
 typedef struct{
 	Player player;
@@ -37,14 +37,23 @@ struct draculaView {
 	Round round;
 	Players **players;
 	Message *messages;
+	char *numTraps;
 	char *pastGamePlays;
 	int turnCounter;
 	int VampireStatus;		// -> 0 if there is no vampire, 1 if it is immature, 2 if it has matured
 	int RoundOfVampire;
 	PlaceId VampireLocation;
+	
 	// TODO: ADD FIELDS HERE
 };
 
+////////////////////////////////////////////////////////////////////////
+//Function declarations
+PlaceId DvCityIdFromMove(char *str);
+void DvActionFromMove(char *str, char *action);
+void DvProcessDracula(DraculaView dv, char *move);
+void DvMatureVampire(DraculaView dv);
+void draculatrail(DraculaView dv, Player player, PlaceId trail[TRAIL_SIZE]);
 ////////////////////////////////////////////////////////////////////////
 // Constructor/Destructor
 
@@ -62,7 +71,9 @@ DraculaView DvNew(char *pastPlays, Message messages[])
 
 void DvFree(DraculaView dv)
 {
+	
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	GvFree(dv->gv);
 	free(dv);
 }
 
@@ -72,38 +83,50 @@ void DvFree(DraculaView dv)
 Round DvGetRound(DraculaView dv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return 0;
+	Round roundNum = GvGetRound(dv->gv);
+	return roundNum;
+
 }
 
 int DvGetScore(DraculaView dv)
 {
+	//Note: Dracula wants the game score to be low.
+
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return 0;
+	int score = GvGetScore(dv->gv);
+	return score;
 }
 
 int DvGetHealth(DraculaView dv, Player player)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return 0;
+	int TargetHealth = GvGetHealth(dv->gv, player);
+	return TargetHealth;
 }
 
 PlaceId DvGetPlayerLocation(DraculaView dv, Player player)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return NOWHERE;
+	PlaceId playerLoc = GvGetPlayerLocation(dv->gv, player);
+	return playerLoc;
 }
+
 
 PlaceId DvGetVampireLocation(DraculaView dv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return NOWHERE;
+	PlaceId vampireLoc = GvGetVampireLocation(dv->gv);
+	return vampireLoc;
 }
 
 PlaceId *DvGetTrapLocations(DraculaView dv, int *numTraps)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numTraps = 0;
-	return NULL;
+	// Cycle through each city and gather all traps, return number of traps back
+	PlaceId *trapLoc = malloc(sizeof(*trapLoc));
+	trapLoc =  GvGetTrapLocations(dv->gv, numTraps);
+	return trapLoc;
+
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -112,24 +135,177 @@ PlaceId *DvGetTrapLocations(DraculaView dv, int *numTraps)
 PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numReturnedMoves = 0;
-	return NULL;
+	PlaceId *idList = malloc(sizeof(PlaceId)* NUM_REAL_PLACES);
+	return idList;
+	
 }
 
 PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numReturnedLocs = 0;
-	return NULL;
+
+	//gets the last 6 locations of the dracula (trail)
+	int numReturnedLocs1;
+	bool canFree;
+	PlaceId* moveList = GvGetLastMoves(dv->gv, PLAYER_DRACULA, 6, &numReturnedLocs1, &canFree);
+
+	//current location of dracula
+	PlaceId draclocation = DvGetPlayerLocation(dv, PLAYER_DRACULA);
+
+	//all the connected locations to the current location
+	int numReturnedLocs2;
+	PlaceId *listofconnections = GvGetReachable(dv->gv,PLAYER_DRACULA,DvGetRound(dv), draclocation , &numReturnedLocs2);
+
+	// int size = numReturnedLocs2;
+	// int invalid = 0;
+
+
+	int numReturnedTrail;
+	bool canFreeTrail;
+	PlaceId *trail = GvGetLastLocations(dv->gv, PLAYER_DRACULA, 6, &numReturnedTrail, &canFreeTrail);
+
+	PlaceId *idList = malloc(sizeof(PlaceId)*NUM_REAL_PLACES);
+	int idListCount = 0;
+
+	//if there is no location for the dracula to go to, it will teleport to Castle Dracula
+	
+	if (draclocation == NOWHERE || numReturnedLocs2 == 0) {
+		idList[0] = CASTLE_DRACULA;
+		*numReturnedLocs = 1;
+
+	} 
+	
+	// int hide = FALSE;
+	// int doubleback = FALSE;
+	// bool hide = false;
+	// int hidRound = -1;
+	bool doubleBack = false;
+	// int DBround = -1;
+	
+	// check if we have double backed once before
+	for (int i = 0; i < numReturnedLocs1; i++) {
+		if (DOUBLE_BACK_1 <= moveList[i] && moveList[i] <= DOUBLE_BACK_5) {
+			doubleBack = true;
+			// DBround = i;
+		} 
+		if (moveList[i] == HIDE) {
+			// hide = true;
+			// hidRound = i;
+		}
+	}
+
+	
+	for (int i = 0; i < numReturnedLocs2; i++) {
+		if (doubleBack) {
+			bool hasVisitied = false;
+			for (int j = 0; j < numReturnedTrail; j++) {
+				if (trail[j] == listofconnections[i]) {
+					hasVisitied = true;
+				}
+			}
+			if (!hasVisitied) {
+				idList[idListCount] = listofconnections[i];
+				idListCount++;
+			}
+		} else {
+			idList[idListCount] = listofconnections[i];
+			idListCount++;
+		}
+	}
+
+
+	
+	free(moveList);
+	free(listofconnections);
+	free(trail);
+
+	return idList;
+
 }
+
 
 PlaceId *DvWhereCanIGoByType(DraculaView dv, bool road, bool boat,
                              int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numReturnedLocs = 0;
-	return NULL;
+	int numReturnedLocs1;
+	bool canFree;
+	PlaceId* moveList = GvGetLastMoves(dv->gv, PLAYER_DRACULA, 6, &numReturnedLocs1, &canFree);
+
+	//current location of dracula
+	PlaceId draclocation = DvGetPlayerLocation(dv, PLAYER_DRACULA);
+
+	//all the connected locations to the current location
+	int numReturnedLocs2;
+	PlaceId *listofconnections = GvGetReachableByType(dv->gv,PLAYER_DRACULA,DvGetRound(dv), draclocation , road, false, boat, &numReturnedLocs2);
+
+	// int size = numReturnedLocs2;
+	// int invalid = 0;
+
+
+	int numReturnedTrail;
+	bool canFreeTrail;
+	PlaceId *trail = GvGetLastLocations(dv->gv, PLAYER_DRACULA, 6, &numReturnedTrail, &canFreeTrail);
+
+	PlaceId *idList = malloc(sizeof(PlaceId)*NUM_REAL_PLACES);
+	int idListCount = 0;
+
+	//if there is no location for the dracula to go to, it will teleport to Castle Dracula
+	if (draclocation == NOWHERE || numReturnedLocs2 == 0) {
+		idList[0] = CASTLE_DRACULA;
+		*numReturnedLocs = 1;
+
+	} 
+	
+	// int hide = FALSE;
+	// int doubleback = FALSE;
+	// bool hide = false;
+	// int hidRound = -1;
+	bool doubleBack = false;
+	// int DBround = -1;
+	
+	// check if we have double backed once before
+	for (int i = 0; i < numReturnedLocs1; i++) {
+		if (DOUBLE_BACK_1 <= moveList[i] && moveList[i] <= DOUBLE_BACK_5) {
+			doubleBack = true;
+			// DBround = i;
+		} 
+		if (moveList[i] == HIDE) {
+			// hide = true;
+			// hidRound = i;
+		}
+	}
+
+	
+	for (int i = 0; i < numReturnedLocs2; i++) {
+		if (doubleBack) {
+			bool hasVisitied = false;
+			for (int j = 0; j < numReturnedTrail; j++) {
+				if (trail[j] == listofconnections[i]) {
+					hasVisitied = true;
+				}
+			}
+			if (!hasVisitied) {
+				idList[idListCount] = listofconnections[i];
+				idListCount++;
+			}
+		} else {
+			idList[idListCount] = listofconnections[i];
+			idListCount++;
+		}
+	}
+
+
+	
+	free(moveList);
+	free(listofconnections);
+	free(trail);
+
+	return idList;
+
+
 }
+
 
 PlaceId *DvWhereCanTheyGo(DraculaView dv, Player player,
                           int *numReturnedLocs)
@@ -155,6 +331,7 @@ PlaceId *DvWhereCanTheyGo(DraculaView dv, Player player,
 
 	return idList;
 }
+
 
 PlaceId *DvWhereCanTheyGoByType(DraculaView dv, Player player,
                                 bool road, bool rail, bool boat,
@@ -184,7 +361,45 @@ PlaceId *DvWhereCanTheyGoByType(DraculaView dv, Player player,
 	return idList;
 }
 
+
 ////////////////////////////////////////////////////////////////////////
 // Your own interface functions
 
 // TODO
+
+/*
+void draculatrail(DraculaView dv, Player player, PlaceId trail[TRAIL_SIZE]) {
+
+	GvGetLocationHistory(dv->gv, player, numReturnedLocs, canFree);
+	if(player == PLAYER_DRACULA){
+			for(int i = 0; i < TRAIL_SIZE; i++){
+
+				switch(trail[i]){
+					case DOUBLE_BACK_1:
+					trail[i] = trail[i + 1]; 
+					break;
+
+					case DOUBLE_BACK_2: 
+					trail[i] = trail[i + 2];
+					break;
+
+					case DOUBLE_BACK_3: 
+					trail[i] = trail[i + 3]; 
+					break;
+
+					case DOUBLE_BACK_4: 
+					trail[i] = trail[i + 4]; 
+					break;
+
+					case DOUBLE_BACK_5: 
+					trail[i] = trail[i + 5]; 
+					break;
+
+					case HIDE: 
+					trail[i] = trail[i+1]; 
+					break;
+				}
+			}
+		}
+}
+*/
