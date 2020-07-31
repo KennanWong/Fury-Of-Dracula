@@ -151,7 +151,7 @@ PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
 	//all the connected locations to the current location
 	PlaceId listofconnections = GvGetReachable(dv->gv,PLAYER_DRACULA,dv->round,draclocation,numReturnedLocs);
 
-	int size = *numLocations;
+	int size = *numReturnedLocs;
 	int invalid = 0;
 
 	//if there is no location for the dracula to go to, it will teleport to Castle Dracula
