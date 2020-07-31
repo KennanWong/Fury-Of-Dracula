@@ -147,11 +147,12 @@ PlaceId *DvWhereCanTheyGo(DraculaView dv, Player player,
 
 	//Using MapGetConnection which gives a linked list of all the connections to that city
 	PlaceId *list = GvGetReachable(dv->gv,player,dv->round,CurrCityId,numReturnedLocs);
+
 	for(int i = 0; i < *numReturnedLocs; i++) {
 		idList[i] = list[i];
 	}
 	//Transferring all of the places in List into idList
-	
+	free(list);
 
 	return idList;
 }
@@ -181,6 +182,7 @@ PlaceId *DvWhereCanTheyGoByType(DraculaView dv, Player player,
 		i++;
 	}
 	printf("numReturnedLocs after GvGetReachablebyType is %d\n",*numReturnedLocs);
+	free(list);
 	return idList;
 }
 
