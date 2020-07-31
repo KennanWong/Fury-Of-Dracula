@@ -34,12 +34,11 @@ typedef struct{
 }Players;
 
 struct gameView {
-	Map map;
-	int CurrentScore;
+	Map map;			
+	int CurrentScore;		
 	Round round;
 	Players **players;
 	Message *messages;
-	char *pastGamePlays;
 	int turnCounter;
 	int VampireStatus;		// -> 0 if there is no vampire, 1 if it is immature, 2 if it has matured
 	int RoundOfVampire;
@@ -120,7 +119,6 @@ GameView GvNew(char *pastPlays, Message messages[])
 			newPlayer->health = GAME_START_BLOOD_POINTS;
 		}
 		newPlayer->currLoc = NOWHERE;
-		
 		newPlayer->numTurns = 0;
 		new->players[i] = newPlayer;
 	
@@ -136,19 +134,20 @@ GameView GvNew(char *pastPlays, Message messages[])
 
 	if (strlen(pastPlays) != 0) {
 		char *str;
-		int i = 0;
+		int i = 0;														// i will determine the turn counter
 		while ((str = strsep(&tempPastPlays, " ")) != NULL) {	
 			int playerId = i%5;											// i%5 will determine who made the move
 			Players *currPlayer = new->players[playerId];
 			new->PastPlaysArray[new->turnCounter] = strdup(str);		// strdup the string to save in memory
-			currPlayer->numTurns += 1;
+			currPlayer->numTurns += 1;									// increment the number turns the player has made
 			i+=1;
 			if (str[0] == 'D') {
-				// if we are processing draculas move
+				// if we are processing draculas movz
 				ProcessDracula(new, new->PastPlaysArray[new->turnCounter]);
 			} else {
 				// otherwise we are processing a hunters turn
 				if (currPlayer->health == 0) {
+					// If the player has no health, reset health back to the start
 					currPlayer->health = GAME_START_HUNTER_LIFE_POINTS;
 				}
 				ProcessHunter(new, new->PastPlaysArray[new->turnCounter], currPlayer);
@@ -161,12 +160,11 @@ GameView GvNew(char *pastPlays, Message messages[])
 			}
 			new->turnCounter = i;
 		}
-		new->round = i/5;	
 	}
 	
 	
 	free(tempPastPlays);
-	// free(toFree);
+	
 	return new;
 }
 
@@ -179,7 +177,7 @@ void GvFree(GameView gv)
 	for (int i = 0; i < gv->turnCounter; i++) {
 		free(gv->PastPlaysArray[i]);
 	}
-	free(gv->pastGamePlays);
+	
 	MapFree(gv->map);
 	
 	free(gv);
@@ -618,12 +616,11 @@ void ProcessDracula(GameView gv, char *move) {
 	PlaceId currLoc = CityIdFromMove(move);
 	
 	if (move[1] == 'D') {
-		
+		// if the move is a double back move, trace back to the correct location
 		int DBval = move[2] - '0';
-		
 		currLoc = CityIdFromMove(gv->PastPlaysArray[gv->turnCounter - DBval*5]);
-		
 	} else if (currLoc == HIDE) {
+		// if the currLoc is hide, retain the draculas current location
 		currLoc = Dracula->currLoc;
 		
 	} 
@@ -677,14 +674,16 @@ void ProcessHunter(GameView gv, char *move, Players *player){
 
 	PlaceId currLoc = CityIdFromMove(move);
 	if (currLoc == player->currLoc) {
-		// the player has rest
-		// increase health
+		// the player has rested
+		// increase health 
 		if (player->health + LIFE_GAIN_REST > GAME_START_HUNTER_LIFE_POINTS) {
+			// if the players new health exceed the health cap, set it to the cap
 			player->health = GAME_START_HUNTER_LIFE_POINTS;
 		} else {
 			player->health = player->health + LIFE_GAIN_REST;
 		}	
 	} else {
+		// otherwise the players location gets upated
 		player->currLoc = currLoc;
 	}
 	char action[4];
@@ -709,7 +708,6 @@ void ProcessHunter(GameView gv, char *move, Players *player){
 			player->currLoc = ST_JOSEPH_AND_ST_MARY;
 			player->health = 0;
 			gv->CurrentScore = gv->CurrentScore - SCORE_LOSS_HUNTER_HOSPITAL;
-			
 			return;
 		}
 	}
