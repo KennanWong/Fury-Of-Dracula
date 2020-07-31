@@ -228,7 +228,8 @@ PlaceId *GvGetTrapLocations(GameView gv, int *numTraps)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	// Cycle through each city and gather all traps, return number of traps back
-	PlaceId *TrapLocations = malloc(sizeof(*TrapLocations));
+	*numTraps = 0;
+	PlaceId *TrapLocations = malloc(sizeof(PlaceId)*(GvGetRound(gv)+1));
 	for (PlaceId i = 0; i < NUM_REAL_PLACES; i++) {
 		int NumTrapsAtLoc = GetTrapsLoc(i, gv->map);
 		for (int t = 0; t < NumTrapsAtLoc; t++) {
@@ -448,18 +449,21 @@ PlaceId *GvGetReachable(GameView gv, Player player, Round round,
 		}
 
 		// dracula can only go by road to boat. 
-		bool *canFree = false;
+		bool canFree = false;
 		bool hasVisited = false;
 
 		if (player == PLAYER_DRACULA) {
 			// check if dracula has already visited the location.
-			PlaceId* visitedList = GvGetLocationHistory(gv, player, numReturnedLocs, canFree);
+			int numPlaces = 0;
+			PlaceId* visitedList = GvGetLastLocations(gv, player, 6, &numPlaces, &canFree);
+			
 			// if location already visited set hasVisited to true. 
-			for (int i = 0; i < 5; i++) {
-				if(GvGetPlayerLocation(gv, player) == visitedList[i]) {
+			for (int i = 0; i < numPlaces; i++) {
+				if(curr->p == visitedList[i]) {
 					hasVisited = true;
 				}
 			}
+
 			if (hasVisited != true) {
 				if (curr->type == ROAD) {
 					// idList = realloc(idList, (*numReturnedLocs + 1) * sizeof(*idList));
@@ -545,7 +549,7 @@ PlaceId *GvGetReachableByType(GameView gv, Player player, Round round,
 		if (player == PLAYER_DRACULA) {
 			// check if dracula has already visited the location.
 			int numPlaces = 0;
-			PlaceId* visitedList = GvGetLocationHistory(gv, player, &numPlaces, &canFree);
+			PlaceId* visitedList = GvGetLastLocations(gv, player, 6, &numPlaces, &canFree);
 			
 			// if location already visited set hasVisited to true. 
 			for (int i = 0; i < numPlaces; i++) {
