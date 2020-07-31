@@ -135,10 +135,24 @@ PlaceId *DvGetTrapLocations(DraculaView dv, int *numTraps)
 
 PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 {
-	//PlaceId *idList = malloc(dv->round*sizeof(PlaceId));
+	PlaceId *idList = malloc(dv->round*sizeof(PlaceId));
+	*numReturnedMoves = 0;
 
-	//dracmoves = ProcessDracula(dv, dv->PastPlaysArray[dv->turnCounter]);
-	//*numReturnedMoves = 0;
+	PlaceId draclocation = DvGetPlayerLocation(dv, PLAYER_DRACULA);
+	PlaceId dracmoves = DvProcessDracula(dv, numReturnedMoves);
+
+	if(draclocation == NOWHERE) {
+		return NULL;
+	}
+
+	/*
+	PlaceId *list = GvGetReachable(dv->gv,player,dv->round,draclocation,numReturnedMoves);
+	for(int i = 0; i < *numReturnedMoves; i++) {
+		idList[i] = list[i];
+	}
+
+	return idList;
+	*/
 }
 
 PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
@@ -160,12 +174,12 @@ PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
 	int size = *numReturnedLocs;
 	int invalid = 0;
 
-	//if there is no location for the dracula to go to, it will teleport to Castle Dracula
 	int flag = 0;
 	if (draclocation == NOWHERE) {
 		flag = 1;
 	} 
-	
+
+	//if there is no location for the dracula to go to, it will teleport to Castle Dracula
 	if (listofconnections == NULL) {
 		flag = 1;
 	}
