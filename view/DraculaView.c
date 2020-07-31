@@ -43,7 +43,6 @@ struct draculaView {
 	int VampireStatus;		// -> 0 if there is no vampire, 1 if it is immature, 2 if it has matured
 	int RoundOfVampire;
 	PlaceId VampireLocation;
-	
 	// TODO: ADD FIELDS HERE
 };
 
@@ -61,8 +60,11 @@ DraculaView DvNew(char *pastPlays, Message messages[])
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	DraculaView dv = malloc(sizeof(*dv));
+	if (dv == NULL) {
+		fprintf(stderr, "Couldn't allocate DraculaView\n");
+		exit(EXIT_FAILURE);
+	}
 	dv->gv = GvNew(pastPlays, messages);
-	
 	return dv;
 }
 
@@ -133,112 +135,28 @@ PlaceId *DvGetTrapLocations(DraculaView dv, int *numTraps)
 
 PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 {
-	PlaceId trail[TRAIL_SIZE] = {0};
+	//PlaceId *idList = malloc(dv->round*sizeof(PlaceId));
 
-	//gets the last 6 locations of the dracula (trail)
-	PlaceId* visitedList = draculatrail(dv, PLAYER_DRACULA, trail[TRAIL_SIZE]);
-
-	//current location of dracula
-	PlaceId draclocation = DvGetPlayerLocation(dv, PLAYER_DRACULA);
-
-	//all the connected locations to the current location
-	PlaceId listofconnections = GvGetReachable(dv->gv,PLAYER_DRACULA,dv->round,draclocation,numReturnedLocs);
-
-	int size = *numReturnedLocs;
-	int invalid = 0;
-
-	//if there is no location for the dracula to go to, it will teleport to Castle Dracula
-	int flag = 0;
-	if (draclocation == NOWHERE) {
-		flag = 1;
-	} 
-	
-	if (listofconnections == NULL) {
-		flag = 1;
-	}
-	
-	int hide = 0;
-	int doubleback = 0;
-	while (listofconnections != NULL) {
-
-		//checks to see if trail or double back is in the trail
-		//if it is present, marks either doubleback or hide as true as these are locations that cannot be accessed now
-		int i = 0;
-		while (i < TRAIL_SIZE) {
-			if(trail[i] == DOUBLE_BACK_1 || trail[i] == DOUBLE_BACK_2 || trail[i] == DOUBLE_BACK_3 ||
-			trail[i] == DOUBLE_BACK_4 ||trail[i] == DOUBLE_BACK_5) {
-				doubleback = 1;
-			}
-
-			if(trail[i] == HIDE) {
-				hide = 1;
-			}
-			i++;
-		}
-
-		//incrememnts count everytime a possible location the dracula can travel to is also the same location
-		//which is present in trail
-		if(doubleback == 1){
-			for(int d = 0; d < TRAIL_SIZE; d++){
-				for(int k = 0; k < size; k++){
-					if(trail[d] == listofconnections[k]){
-						invalid++;
-						listofconnections[k] = -1;
-					}
-				}
-			}
-		}
-
-		//incrememnts count everytime a possible location the dracula can travel to is also the same location
-		//which is present in trail
-		if(hide == 1){
-			for(int p = 0; p < size; p++){
-				if(listofconnections[p] == draclocation){
-					listofconnections[p] = -1;
-					invalid++;
-				}
-			}
-		}
-
-		//the real amount of locations the dracula can travel to after adapting to dracula restrictions
-		*numReturnedLocs = size - invalid;
-		PlaceId *newconnections = malloc(sizeof(PlaceId) * (*numReturnedLocs));
-
-		int l = 0, m = 0;
-		while(l < numReturnedLocs) {
-			if(listofconnections[m] != -1){
-				if ((listofconnections->type == ROAD) || (listofconnections->type == BOAT)) {
-					newconnections[l] = listofconnections[m];
-					l++;
-				}
-			}
-			m++;
-		}
-	}
-
-	if (flag == 1) {
-		*numReturnedLocs = 0;
-		return NULL;
-	}
-
-	return newconnections;
-
+	//dracmoves = ProcessDracula(dv, dv->PastPlaysArray[dv->turnCounter]);
+	//*numReturnedMoves = 0;
 }
 
 PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+
 	PlaceId trail[TRAIL_SIZE] = {0};
 
 	//gets the last 6 locations of the dracula (trail)
-	PlaceId* visitedList = draculatrail(dv, PLAYER_DRACULA, trail[TRAIL_SIZE]);
+	//PlaceId *visitedList = draculatrail(dv, PLAYER_DRACULA, trail[TRAIL_SIZE]);
 
 	//current location of dracula
 	PlaceId draclocation = DvGetPlayerLocation(dv, PLAYER_DRACULA);
 
 	//all the connected locations to the current location
-	PlaceId listofconnections = GvGetReachable(dv->gv,PLAYER_DRACULA,dv->round,draclocation,numReturnedLocs);
+	PlaceId *listofconnections = GvGetReachable(dv->gv,PLAYER_DRACULA,dv->round,draclocation,numReturnedLocs);
 
+	*numReturnedLocs = 0;
 	int size = *numReturnedLocs;
 	int invalid = 0;
 
@@ -300,12 +218,12 @@ PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
 		PlaceId *newconnections = malloc(sizeof(PlaceId) * (*numReturnedLocs));
 
 		int l = 0, m = 0;
-		while(l < numReturnedLocs) {
+		while(l < size) {
 			if(listofconnections[m] != -1){
-				if ((listofconnections->type == ROAD) || (listofconnections->type == BOAT)) {
-					newconnections[l] = listofconnections[m];
-					l++;
-				}
+				//if ((listofconnections->type == ROAD) || (listofconnections->type == BOAT)) {
+				newconnections[l] = listofconnections[m];
+				l++;
+				//}
 			}
 			m++;
 		}
@@ -328,22 +246,22 @@ PlaceId *DvWhereCanIGoByType(DraculaView dv, bool road, bool boat,
 	PlaceId trail[TRAIL_SIZE] = {0};
 
 	//gets the last 6 locations of the dracula (trail)
-	PlaceId* visitedList = draculatrail(dv, PLAYER_DRACULA, trail[TRAIL_SIZE]);
+	//PlaceId *visitedList = draculatrail(dv, PLAYER_DRACULA, *trail[TRAIL_SIZE]);
 
 	//current location of dracula
 	PlaceId draclocation = DvGetPlayerLocation(dv, PLAYER_DRACULA);
 
 	//all the connected locations to the current location
-	PlaceId listofconnections = GvGetReachableByType(dv->gv,PLAYER_DRACULA,dv->round,draclocation, road, 0, boat, numReturnedLocs);
+	PlaceId *listofconnections = GvGetReachableByType(dv->gv,PLAYER_DRACULA,dv->round,draclocation, road, 0, boat, numReturnedLocs);
 
+	*numReturnedLocs = 0;
 	int size = *numReturnedLocs;
 	int invalid = 0;
-	int hide = 0;
-	int doubleback = 0;
-	int flag = 0;
+
+
 	//if there is no location for the dracula to go to, it will teleport to Castle Dracula
 	
-
+	int flag = 0;
 	if (draclocation == NOWHERE) {
 		flag = 1;
 	} 
@@ -356,6 +274,8 @@ PlaceId *DvWhereCanIGoByType(DraculaView dv, bool road, bool boat,
 
 		//checks to see if trail or double back is in the trail
 		//if it is present, marks either doubleback or hide as true as these are locations that cannot be accessed now
+		int hide = 0;
+		int doubleback = 0;
 		int i = 0;
 		while (i < TRAIL_SIZE) {
 			if(trail[i] == DOUBLE_BACK_1 || trail[i] == DOUBLE_BACK_2 || trail[i] == DOUBLE_BACK_3 ||
@@ -398,12 +318,12 @@ PlaceId *DvWhereCanIGoByType(DraculaView dv, bool road, bool boat,
 		PlaceId *newconnections = malloc(sizeof(PlaceId) * (*numReturnedLocs));
 
 		int l = 0, m = 0;
-		while(l < numReturnedLocs) {
+		while(l < size) {
 			if(listofconnections[m] != -1){
-				if ((listofconnections->type == ROAD) || (listofconnections->type == BOAT)) {
-					newconnections[l] = listofconnections[m];
-					l++;
-				}
+				//if ((listofconnections->type == ROAD) || (listofconnections->type == BOAT)) {
+				newconnections[l] = listofconnections[m];
+				l++;
+				//}
 			}
 			m++;
 		}
@@ -423,8 +343,25 @@ PlaceId *DvWhereCanTheyGo(DraculaView dv, Player player,
                           int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	PlaceId *idList = malloc(dv->round*sizeof(PlaceId));
 	*numReturnedLocs = 0;
-	return NULL;
+	//Defining the current location of the player given as CurrCityId
+	PlaceId CurrCityId = GvGetPlayerLocation(dv->gv, player);
+
+	//If the player is currently NOWHERE i.e hasn't made a move, return NULL
+	if(CurrCityId == NOWHERE) {
+		return NULL;
+	}
+
+	//Using MapGetConnection which gives a linked list of all the connections to that city
+	PlaceId *list = GvGetReachable(dv->gv,player,dv->round,CurrCityId,numReturnedLocs);
+	for(int i = 0; i < *numReturnedLocs; i++) {
+		idList[i] = list[i];
+	}
+	//Transferring all of the places in List into idList
+	
+
+	return idList;
 }
 
 
@@ -433,8 +370,27 @@ PlaceId *DvWhereCanTheyGoByType(DraculaView dv, Player player,
                                 int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	PlaceId *idList = malloc(dv->round*sizeof(PlaceId));
 	*numReturnedLocs = 0;
-	return NULL;
+	//Defining the current location of the player given as CurrCityId
+	PlaceId CurrCityId = GvGetPlayerLocation(dv->gv, player);
+	//If the player is currently NOWHERE i.e hasn't made a move, return NULL
+	if(CurrCityId == NOWHERE) {
+		return NULL;
+	}
+	printf("numReturnedLocs before GvGetReachablebyType is %d\n",(*numReturnedLocs));
+	printf("Flag1\n");
+	printf("%d\n",CurrCityId);
+	PlaceId *list = GvGetReachableByType(dv->gv,player,dv->round,CurrCityId,road,rail,boat,numReturnedLocs);
+	printf("Flag2\n");
+	//Transferring all of the places in List into HWCIGBT
+	int i = 0;
+	while(i < *numReturnedLocs) {
+		idList[i] = list[i];
+		i++;
+	}
+	printf("numReturnedLocs after GvGetReachablebyType is %d\n",*numReturnedLocs);
+	return idList;
 }
 
 
@@ -467,7 +423,7 @@ void DvProcessDracula(DraculaView dv, char *move) {
 		
 		int DBval = move[2] - '0';
 		
-		currLoc = CityIdFromMove(dv->gv->PastPlaysArray[dv->turnCounter - DBval*5]);
+		currLoc = CityIdFromMove(dv->PastPlaysArray[dv->turnCounter - DBval*5]);
 		
 	} else if (currLoc == HIDE) {
 		currLoc = Dracula->currLoc;
@@ -494,7 +450,7 @@ void DvProcessDracula(DraculaView dv, char *move) {
 
 	// Process action
 	char action[4];
-	ActionFromMove(move, action);
+	DvActionFromMove(move, action);
 	if (action[0] == 'T') {
 		// Add trap to location
 		//printf("adding trap\n");
@@ -510,7 +466,7 @@ void DvProcessDracula(DraculaView dv, char *move) {
 	}
 	if (action[2] == 'M') {
 		// Remove a trap that has malfunction as it has left the trail
-		RemoveTrapFromLoc(CityIdFromMove(dv->PastPlaysArray[gv->turnCounter - 30]), dv->map);
+		RemoveTrapFromLoc(CityIdFromMove(dv->PastPlaysArray[dv->turnCounter - 30]), dv->map);
 	} else if (action[2] == 'V') {
 		// Mature Vamp
 		DvMatureVampire(dv);
@@ -529,7 +485,7 @@ void DvMatureVampire(DraculaView dv) {
 
 void draculatrail(DraculaView dv, Player player, PlaceId trail[TRAIL_SIZE]) {
 
-	GvGetLocationHistory(dv->gv, player, numReturnedLocs, canFree);
+	GvGetLocationHistory(dv->gv, player, *numReturnedLocs, *canFree);
 	if(player == PLAYER_DRACULA){
 			for(int i = 0; i < TRAIL_SIZE; i++){
 
