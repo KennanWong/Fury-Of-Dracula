@@ -185,7 +185,7 @@ PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 		return idList;
 	} 
 
-	printf("pass1\n");
+	// printf("pass1\n");
 	// int hide = FALSE;
 	// int doubleback = FALSE;
 	bool hide = false;
@@ -204,7 +204,7 @@ PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 			// hidRound = i;
 		}
 	}
-	printf("pass2\n");
+	// printf("pass2\n");
 	for (int i = 0; i < numReturnedLocs2; i++) {
 		if (doubleBack) {
 			bool hasVisitied = false;
@@ -224,7 +224,7 @@ PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 			}
 		}
 	}
-	printf("pass3\n");
+	// printf("pass3\n");
 	if (!doubleBack) {
 		for (int i = 0; i < GvGetRound(dv->gv); i++) {
 			idList[idListCount] = DOUBLE_BACK_1 + i;
@@ -242,12 +242,12 @@ PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 	free(trail);
 
 	*numReturnedMoves = idListCount;
-	printf("idlistcount = %d\n", idListCount);
-
+	// printf("idlistcount = %d\n", idListCount);
+	/*
 	for (int i = 0; i < idListCount; i++) {
 		printf("idlist[%d] = %s\n", i, placeIdToName(idList[i]));
 	}
-
+	*/
 	return idList;
 
 }
@@ -332,7 +332,7 @@ PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
 	free(trail);
 
 	*numReturnedLocs = idListCount;
-	printf("idListCount = %d\n", idListCount);
+	// printf("idListCount = %d\n", idListCount);
 
 	return idList;
 
