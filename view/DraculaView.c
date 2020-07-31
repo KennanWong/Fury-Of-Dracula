@@ -134,10 +134,24 @@ PlaceId *DvGetTrapLocations(DraculaView dv, int *numTraps)
 
 PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	PlaceId *idList = malloc(sizeof(PlaceId)* NUM_REAL_PLACES);
+	PlaceId *idList = malloc(dv->round*sizeof(PlaceId));
+	*numReturnedMoves = 0;
+
+	PlaceId draclocation = DvGetPlayerLocation(dv, PLAYER_DRACULA);
+	PlaceId dracmoves = DvProcessDracula(dv, numReturnedMoves);
+
+	if(draclocation == NOWHERE) {
+		return NULL;
+	}
+
+	/*
+	PlaceId *list = GvGetReachable(dv->gv,player,dv->round,draclocation,numReturnedMoves);
+	for(int i = 0; i < *numReturnedMoves; i++) {
+		idList[i] = list[i];
+	}
+
 	return idList;
-	
+	*/
 }
 
 PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
@@ -370,7 +384,7 @@ PlaceId *DvWhereCanTheyGoByType(DraculaView dv, Player player,
 /*
 void draculatrail(DraculaView dv, Player player, PlaceId trail[TRAIL_SIZE]) {
 
-	GvGetLocationHistory(dv->gv, player, numReturnedLocs, canFree);
+	GvGetLocationHistory(dv->gv, player, *numReturnedLocs, *canFree);
 	if(player == PLAYER_DRACULA){
 			for(int i = 0; i < TRAIL_SIZE; i++){
 
