@@ -14,26 +14,45 @@
 #include "HunterView.h"
 
 #include <stdio.h>
+#include "Places.h"
 
 void decideHunterMove(HunterView hv)
 {
 	// TODO: Replace this with something better!
-	int *round = 0;
-	int *numReturnedLocs = 0;
-	// If Dracula's last location is known
-	if(HvGetLastKnownDraculaLocation(hv,round) != NOWHERE) {
-		// Finding the shortest path to last known dracula's location
-		PlaceId dest = HvGetLastKnownDraculaLocation(hv,round);
-		int *pathlength = 0;
-		PlaceId *path = HvGetShortestPathTo(hv,HvGetPlayer(hv),dest,pathlength);
-		printf("path[0] is %d\n",path[0]);
-
-	} 
-	// Else if Dracula's last location is not known
-	else {
-		// Finding all possible moves that the current player can make
-		PlaceId *paths = HvWhereCanIGo(hv,numReturnedLocs);
-		printf("paths[0] is %d\n",paths[0]);
+	if(HvGetPlayerLocation(hv,HvGetPlayer(hv)) == NOWHERE) {
+		registerBestPlay("AL","This is a message");
 	}
-	registerBestPlay("TO", "Have we nothing Toulouse?");
+	else {
+		int *round = 0;
+		int numReturnedLocs = 0;
+		// If Dracula's last location is known
+		PlaceId dest = HvGetLastKnownDraculaLocation(hv,round);
+		PlaceId toGo;
+		if(dest != NOWHERE) {
+			// Finding the shortest path to last known dracula's location
+			int *pathlength = 0;
+			PlaceId *shortestPath = HvGetShortestPathTo(hv,HvGetPlayer(hv),dest,pathlength);
+			toGo = shortestPath[0];
+		} 
+		// Else if Dracula's last location is not known
+		else {
+			// Finding all possible moves that the current player can make
+			PlaceId *canGo = HvWhereCanIGo(hv,&numReturnedLocs);
+			
+			for(int i = 0; i < 4; i++) {
+				PlaceId currLoc = HvGetPlayerLocation(hv,i);
+				for(int m = 0; m < numReturnedLocs; m++) {
+					if(canGo[m] == currLoc) {
+						canGo[m] = -1;
+					}
+				}
+			}
+			int c = 0;
+			while(canGo[c] == -1) {
+				c++;
+			}
+			toGo = canGo[c];
+		}
+		registerBestPlay(placeIdToAbbrev(toGo),"This is a message");
+	}
 }
