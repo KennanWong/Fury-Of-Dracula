@@ -168,25 +168,31 @@ int main(void)
 
 {///////////////////////////////////////////////////////////////////
 	
-		printf("Checking Galatz road connections\n");
-		char *trail = "GGA....";
+	printf("Ionian sea connections\n");
 
-		Message messages[1] = {"Gone to Galatz"};
+		char *trail =
+			"GIO....";
+		
+		Message messages[] = {"Sailing the Ionian"};
 		DraculaView dv = DvNew(trail, messages);
-		
 		int numLocs = -1;
-		PlaceId *locs = DvWhereCanIGo(dv, &numLocs);
-
-		assert(numLocs == 4);
-		sortPlaces(locs, numLocs);
-		assert(locs[0] == BELGRADE);
-		assert(locs[1] == CONSTANTA);
-		assert(locs[2] == GALATZ);
-		assert(locs[3] == SOFIA);
-		free(locs);
+		PlaceId *locs = DvWhereCanTheyGo(dv,PLAYER_LORD_GODALMING,&numLocs);
 		
+		assert(numLocs == 7);
+		sortPlaces(locs, numLocs);
+		assert(locs[0] == SALONICA);
+		assert(locs[1] == VALONA);
+		assert(locs[2] == ATHENS);
+		assert(locs[3] == TYRRHENIAN_SEA);
+		assert(locs[4] == ADRIATIC_SEA);
+		assert(locs[5] == BLACK_SEA);
+		assert(locs[6] == IONIAN_SEA);
+		
+		free(locs);
 		printf("Test passed!\n");
 		DvFree(dv);
 	}
+
+	
 	return EXIT_SUCCESS;
 }

@@ -263,7 +263,7 @@ PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
 
 	//if there is no location for the dracula to go to, it will teleport to Castle Dracula
 	
-	if (draclocation == NOWHERE || numReturnedLocs2 == 0) {
+	if (draclocation == NOWHERE|| numReturnedLocs2 == 0) {
 		idList[0] = CASTLE_DRACULA;
 		*numReturnedLocs = 1;
 
