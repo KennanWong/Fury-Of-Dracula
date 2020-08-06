@@ -255,12 +255,8 @@ PlaceId *GvGetReachableByType(GameView gv, Player player, Round round,
 // Your own interface functions
 
 // TODO
-PlaceId CityIdFromMove(char *str);
-
-
-
 PlaceId *ReturnTrailAtRound(GameView gv, Round round, int *DcNumReturnedLoc, bool *canFree);
-
-void showPastPlaysArray(GameView gv);
+PlaceId CityIdFromMove(char *str); 
 
 #endif // !defined (FOD__GAME_VIEW_H_)
+
