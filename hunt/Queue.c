@@ -34,7 +34,7 @@ void dropQueue (Queue Q)
 	free (Q);
 }
 
-// show Pid -> Pid -> Pid
+// display as 3 > 5 > 4 > ...
 void showQueue (Queue Q)
 {
 	assert (Q != NULL);
