@@ -9,12 +9,35 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
+#include <stdio.h>
+#include "Places.h"
+
 #include "dracula.h"
 #include "DraculaView.h"
 #include "Game.h"
 
-void decideDraculaMove(DraculaView dv)
-{
-	// TODO: Replace this with something better!
-	registerBestPlay("CD", "Mwahahahaha");
+// helper methods decleration
+PlaceId analysemoves(DraculaView dv, PlaceId *possiblemoves, int numReturnedLocs1);
+int Trail(DraculaView dv, PlaceId place);
+
+void decideDraculaMove(DraculaView dv) {
+	if (DvGetPlayerLocation(dv, PLAYER_DRACULA) == NOWHERE) {
+		registerBestPlay("CD", "MWUHAHAHHHA");
+		return;
+	}
+	
+	int returnedLoc = 0;
+	PlaceId *canGo = DvGetValidMoves(dv, &returnedLoc);
+	if (returnedLoc == 0) {
+		// teleport back to castle dracula
+		printf("attempting to teleport back to Castle\n");
+		registerBestPlay("CD", "MWUHAHAHHHA");
+		free(canGo);
+		return;
+	} else {
+		
+		registerBestPlay(placeIdToAbbrev(canGo[0]), "MWUHAHAHHHA");
+		free(canGo);
+		return;
+	}
 }
