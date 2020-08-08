@@ -16,13 +16,5 @@
 void decideDraculaMove(DraculaView dv)
 {
 	// TODO: Replace this with something better!
-	int numReturnedLocs;
-	PlaceId *canGo = DvWhereCanIGoByType(dv,true,false,&numReturnedLocs);
-	PlaceId toGo;
-	if(canGo[0] != CASTLE_DRACULA) {
-		toGo = canGo[0];
-	} else {
-		toGo = CASTLE_DRACULA;
-	}
-	registerBestPlay(placeIdToAbbrev(toGo) , "Mwahahahaha");
+	registerBestPlay("CD", "Mwahahahaha");
 }
