@@ -19,7 +19,7 @@ bool placeIdinList(PlaceId check, PlaceId *list, int ListCount);
 void decideHunterMove(HunterView hv)
 {
 	// TODO: Replace this with something better!
-	printf("hunvter AI v1.1\n");
+	printf("hunvter AI v1.2\n");
 	printf("now deciding hunter move\n");
 	Player currPlayer = HvGetPlayer(hv);
 	PlaceId currLoc = HvGetPlayerLocation(hv, currPlayer);
@@ -32,17 +32,13 @@ void decideHunterMove(HunterView hv)
 
 	// first move
     if(HvGetPlayerLocation(hv,HvGetPlayer(hv)) == NOWHERE) {
-		// go to somewhere where another hunter has not been to
-		PlaceId *playersHaveBeen = malloc(sizeof(PlaceId)*4);
-		for (int i = 0; i < currPlayer; i++) {
-			playersHaveBeen[i] = HvGetPlayerLocation(hv, i);
-		}
-		PlaceId temp = ALICANTE;
-		while (placeIdinList(temp, playersHaveBeen, currPlayer)) {
-			temp++;
-		}
-		registerBestPlay(placeIdToAbbrev(temp),"This is a message");
-		free(playersHaveBeen);
+		printf("players first move\n");
+		Player currPlayer = HvGetPlayer(hv);
+		// Assign hunters to different locations
+		if(currPlayer == PLAYER_LORD_GODALMING) registerBestPlay("BC","This is a message");
+		if(currPlayer == PLAYER_DR_SEWARD) registerBestPlay("ZA","This is a message");
+		if(currPlayer == PLAYER_VAN_HELSING) registerBestPlay("ST","This is a message");
+		if(currPlayer == PLAYER_MINA_HARKER) registerBestPlay("BR","This is a message");
 		return;
 	}
 	else {
@@ -58,7 +54,28 @@ void decideHunterMove(HunterView hv)
 			// we are at draculas location, stick with him
 			printf("we are in the same city as dracula\n");
 			printf("player currently at %s\n", placeIdToAbbrev(currLoc));
-			toGo = currLoc;
+			registerBestPlay(placeIdToAbbrev(currLoc),"This is a message");
+			free(canGo);
+			return;
+		}
+		// PlaceId toGo;
+		if (dest == NOWHERE) {
+			printf("we dont know where dracula is\n");
+
+			// Get array of players past locations
+
+			PlaceId *CurrentLocOfPlayers = malloc(sizeof(PlaceId)*4);
+			for (int i = 0; i < 4; i++) {
+				CurrentLocOfPlayers[i] = HvGetPlayerLocation(hv, i);
+			}
+			
+			for (int i = 0; i < numReturnedLocs; i++) {
+				if (!placeIdinList(canGo[i], CurrentLocOfPlayers, 4)) {
+					toGo = canGo[i];
+				}
+			}
+
+			
 		} else {
 			if (dest == NOWHERE) {
 				printf("we dont know where dracula is\n");
@@ -71,8 +88,6 @@ void decideHunterMove(HunterView hv)
 				free(PathToDrac);
 			}
 		}
-		// PlaceId toGo;
-		
 		
 		registerBestPlay(placeIdToAbbrev(toGo),"This is a message");
 		free(canGo);
