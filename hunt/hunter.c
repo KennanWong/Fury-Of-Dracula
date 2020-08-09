@@ -35,10 +35,10 @@ void decideHunterMove(HunterView hv)
 		printf("players first move\n");
 		Player currPlayer = HvGetPlayer(hv);
 		// Assign hunters to different locations
-		if(currPlayer == PLAYER_LORD_GODALMING) registerBestPlay("BC","This is a message");
-		if(currPlayer == PLAYER_DR_SEWARD) registerBestPlay("ZA","This is a message");
-		if(currPlayer == PLAYER_VAN_HELSING) registerBestPlay("ST","This is a message");
-		if(currPlayer == PLAYER_MINA_HARKER) registerBestPlay("BR","This is a message");
+		if(currPlayer == PLAYER_LORD_GODALMING) registerBestPlay("MN","This is a message");
+		if(currPlayer == PLAYER_DR_SEWARD) registerBestPlay("MA","This is a message");
+		if(currPlayer == PLAYER_VAN_HELSING) registerBestPlay("MU","This is a message");
+		if(currPlayer == PLAYER_MINA_HARKER) registerBestPlay("SO","This is a message");
 		return;
 	}
 	else {
@@ -76,19 +76,14 @@ void decideHunterMove(HunterView hv)
 					toGo = canGo[i];
 				}
 			}
+			free(CurrentLocOfPlayers);
 
 			
 		} else {
-			if (dest == NOWHERE) {
-				printf("we dont know where dracula is\n");
-				toGo = canGo[0];
-			} else {
-				printf("draculas location %s\n", placeIdToName(dest));
-				int pathLength = 0;
-				PlaceId *PathToDrac = HvGetShortestPathTo(hv, currPlayer, dest, &pathLength);
-				toGo = PathToDrac[0];
-				free(PathToDrac);
-			}
+			int pathLength = 0;
+			PlaceId *PathToDrac = HvGetShortestPathTo(hv, currPlayer, dest, &pathLength);
+			toGo = PathToDrac[0];
+			free(PathToDrac);
 		}
 		
 		registerBestPlay(placeIdToAbbrev(toGo),"This is a message");

@@ -24,9 +24,49 @@ bool placeIdinList(PlaceId check, PlaceId *list, int ListCount);
 
 void decideDraculaMove(DraculaView dv) {
 	if (DvGetPlayerLocation(dv, PLAYER_DRACULA) == NOWHERE) {
-		registerBestPlay("CD", "MWUHAHAHHHA");
+		registerBestPlay("AT", "MWUHAHAHHHA");
 		return;
 	}
+
+
+	/*
+	// check heath every round.
+	int draculaHealth = DvGetHealth(dv, PLAYER_DRACULA);
+
+	// if health is less than half go to castle dracula. 
+	if (draculaHealth <= 20) {
+		printf("Low health, moving to castle dracula\n");
+		
+		// road only
+		int returnedLoc1 = 0;
+		PlaceId *goList = DvWhereCanIGoByType(dv, true, false, &returnedLoc1);
+		for (int i = 0; i < returnedLoc1; i++) {
+			if (goList[i] == CASTLE_DRACULA) {
+				registerBestPlay(placeIdToAbbrev(goList[i]), "MWUHAHAHHHA");
+				free(goList);
+				return;
+			}
+		}
+
+	}
+
+	// if draculaHealth is critically low.
+	if (draculaHealth <= 10) {
+		printf("Very Low health, moving to castle dracula\n");
+		
+		// will use both boat and road
+		int returnedLoc2 = 0;
+		PlaceId *goList = DvWhereCanIGoByType(dv, true, true, &returnedLoc2);
+		for (int i = 0; i < returnedLoc2; i++) {
+			if (goList[i] == CASTLE_DRACULA) {
+				registerBestPlay(placeIdToAbbrev(goList[i]), "MWUHAHAHHHA");
+				free(goList);
+				return;
+			}
+		}
+	}
+	*/
+
 	int returnedLoc = 0;
 	PlaceId *canGo = DvGetValidMoves(dv, &returnedLoc);
 	if (returnedLoc == 0) {
@@ -35,6 +75,7 @@ void decideDraculaMove(DraculaView dv) {
 		registerBestPlay("CD", "MWUHAHAHHHA");
 		free(canGo);
 		return;
+		
 	} else {
 		PlaceId toGo = NOWHERE;
 		for (int c = 0; c < returnedLoc; c++) {
