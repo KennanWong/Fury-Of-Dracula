@@ -22,7 +22,6 @@
 #include "Places.h"
 // add your own #includes here
 
-
 typedef struct hunterView *HunterView;
 
 ////////////////////////////////////////////////////////////////////////

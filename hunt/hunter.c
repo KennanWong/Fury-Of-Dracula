@@ -12,47 +12,58 @@
 #include "Game.h"
 #include "hunter.h"
 #include "HunterView.h"
-
 #include <stdio.h>
-#include "Places.h"
 
 void decideHunterMove(HunterView hv)
 {
 	// TODO: Replace this with something better!
-	if(HvGetPlayerLocation(hv,HvGetPlayer(hv)) == NOWHERE) {
+	printf("now deciding hunter move\n");
+	Player currPlayer = HvGetPlayer(hv);
+	PlaceId currLoc = HvGetPlayerLocation(hv, currPlayer);
+	
+
+    if (HvGetHealth(hv, currPlayer) - LIFE_LOSS_TRAP_ENCOUNTER <  0) {
+        registerBestPlay(placeIdToAbbrev(HvGetPlayerLocation(hv, currPlayer)), "this is a message");
+        return;
+    }
+
+	// first move
+    if(HvGetPlayerLocation(hv,HvGetPlayer(hv)) == NOWHERE) {
+		printf("players first move\n");
 		registerBestPlay("AL","This is a message");
+		return;
 	}
 	else {
-		int *round = 0;
+		printf("not players first move\n");
+		printf("player currently at %s\n", placeIdToName(currLoc));
+		int round = 0;
 		int numReturnedLocs = 0;
-		// If Dracula's last location is known
-		PlaceId dest = HvGetLastKnownDraculaLocation(hv,round);
+		PlaceId *canGo = HvWhereCanIGo(hv,&numReturnedLocs);
 		PlaceId toGo;
-		if(dest != NOWHERE) {
-			// Finding the shortest path to last known dracula's location
-			int *pathlength = 0;
-			PlaceId *shortestPath = HvGetShortestPathTo(hv,HvGetPlayer(hv),dest,pathlength);
-			toGo = shortestPath[0];
-		} 
-		// Else if Dracula's last location is not known
-		else {
-			// Finding all possible moves that the current player can make
-			PlaceId *canGo = HvWhereCanIGo(hv,&numReturnedLocs);
-			
-			for(int i = 0; i < 4; i++) {
-				PlaceId currLoc = HvGetPlayerLocation(hv,i);
-				for(int m = 0; m < numReturnedLocs; m++) {
-					if(canGo[m] == currLoc) {
-						canGo[m] = -1;
-					}
-				}
-			}
-			int c = 0;
-			while(canGo[c] == -1) {
-				c++;
-			}
-			toGo = canGo[c];
+		// If Dracula's last location is known
+		PlaceId dest = HvGetLastKnownDraculaLocation(hv, &round);
+		if (dest == currLoc) {
+			// we are at draculas location, stick with him
+			printf("we are in the same city as dracula\n");
+			printf("player currently at %s\n", placeIdToAbbrev(currLoc));
+			registerBestPlay(placeIdToAbbrev(currLoc),"This is a message");
+			free(canGo);
+			return;
 		}
+		// PlaceId toGo;
+		if (dest == NOWHERE) {
+			printf("we dont know where dracula is\n");
+			toGo = canGo[0];
+		} else {
+			printf("draculas location %s\n", placeIdToName(dest));
+			int pathLength = 0;
+			PlaceId *PathToDrac = HvGetShortestPathTo(hv, currPlayer, dest, &pathLength);
+			toGo = PathToDrac[0];
+			free(PathToDrac);
+		}
+		
 		registerBestPlay(placeIdToAbbrev(toGo),"This is a message");
+		free(canGo);
 	}
+    return;
 }

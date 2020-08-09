@@ -11,6 +11,9 @@
 #include <stdio.h>
 #include "Places.h"
 
+#include <stdio.h>
+#include "Places.h"
+
 #include "dracula.h"
 #include "DraculaView.h"
 #include "Game.h"
@@ -20,6 +23,7 @@ PlaceId analysemoves(DraculaView dv, PlaceId *possiblemoves, int numReturnedLocs
 int Trail(DraculaView dv, PlaceId place);
 
 void decideDraculaMove(DraculaView dv) {
+<<<<<<< HEAD
 	// Trail Helper method
 	int Trail(DraculaView dv, PlaceId place) {
 
@@ -64,3 +68,25 @@ void decideDraculaMove(DraculaView dv) {
 	registerBestPlay(placeIdToAbbrev(finalmove), "Mwuhahahaha");
 }
 
+=======
+	if (DvGetPlayerLocation(dv, PLAYER_DRACULA) == NOWHERE) {
+		registerBestPlay("CD", "MWUHAHAHHHA");
+		return;
+	}
+	
+	int returnedLoc = 0;
+	PlaceId *canGo = DvGetValidMoves(dv, &returnedLoc);
+	if (returnedLoc == 0) {
+		// teleport back to castle dracula
+		printf("attempting to teleport back to Castle\n");
+		registerBestPlay("CD", "MWUHAHAHHHA");
+		free(canGo);
+		return;
+	} else {
+		
+		registerBestPlay(placeIdToAbbrev(canGo[0]), "MWUHAHAHHHA");
+		free(canGo);
+		return;
+	}
+}
+>>>>>>> ac6775c63e7efb5c32d14c67ceb8daab40790d7a
