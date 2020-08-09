@@ -464,7 +464,7 @@ PlaceId *DvWhereCanTheyGoByType(DraculaView dv, Player player,
 
 // TODO
 
-/*
+
 void draculatrail(DraculaView dv, Player player, PlaceId trail[TRAIL_SIZE]) {
 
 	GvGetLocationHistory(dv->gv, player, *numReturnedLocs, *canFree);
@@ -499,4 +499,4 @@ void draculatrail(DraculaView dv, Player player, PlaceId trail[TRAIL_SIZE]) {
 			}
 		}
 }
-*/
+
