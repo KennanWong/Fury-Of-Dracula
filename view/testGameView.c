@@ -92,6 +92,7 @@ int main(void)
 		assert(GvGetPlayerLocation(gv, PLAYER_DRACULA) == NOWHERE);
 
 		GvFree(gv);
+		printf("Message is shown as %s",messages[1]);
 		printf("Test passed!\n");
 	}
 
@@ -442,6 +443,17 @@ int main(void)
 			assert(locs[3] == SANTANDER);
 			assert(locs[4] == MADRID);
 			if (canFree) free(locs);
+		}
+		
+		//Testing GvGetLastMoves
+		{
+			int numMoves = 0; bool canFree = false;
+			PlaceId *locs = GvGetLastMoves(gv, PLAYER_DRACULA, 3, &numMoves, &canFree);
+
+			assert(numMoves == 3);
+			assert(locs[0] == DOUBLE_BACK_3);
+			assert(locs[1] == HIDE);
+			assert(locs[2] == CITY_UNKNOWN);
 		}
 		
 		GvFree(gv);
