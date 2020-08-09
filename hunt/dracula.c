@@ -19,13 +19,14 @@
 // helper methods decleration
 PlaceId analysemoves(DraculaView dv, PlaceId *possiblemoves, int numReturnedLocs1);
 int Trail(DraculaView dv, PlaceId place);
+bool placeIdinList(PlaceId check, PlaceId *list, int ListCount);
+
 
 void decideDraculaMove(DraculaView dv) {
 	if (DvGetPlayerLocation(dv, PLAYER_DRACULA) == NOWHERE) {
 		registerBestPlay("CD", "MWUHAHAHHHA");
 		return;
 	}
-	
 	int returnedLoc = 0;
 	PlaceId *canGo = DvGetValidMoves(dv, &returnedLoc);
 	if (returnedLoc == 0) {
@@ -35,9 +36,36 @@ void decideDraculaMove(DraculaView dv) {
 		free(canGo);
 		return;
 	} else {
-		
-		registerBestPlay(placeIdToAbbrev(canGo[0]), "MWUHAHAHHHA");
+		PlaceId toGo = NOWHERE;
+		for (int c = 0; c < returnedLoc; c++) {
+			int conflictingLoc = 0;
+			for (int p = 0; p < 4; p++) {
+				int numReturnedHunterLoc = 0;
+				PlaceId *playerCanGoTo = DvWhereCanTheyGo(dv, p, &numReturnedHunterLoc);
+				if (placeIdinList(canGo[c], playerCanGoTo, numReturnedHunterLoc)) {
+					conflictingLoc = 1;
+				}
+				free(playerCanGoTo);
+			}
+			if (conflictingLoc == 0) {
+				toGo = canGo[c];
+			}
+		}
+		if (toGo == NOWHERE) {
+			toGo = canGo[DvGetScore(dv)%returnedLoc];
+		}
+		registerBestPlay(placeIdToAbbrev(toGo), "MWUHAHHAHAH");
 		free(canGo);
 		return;
 	}
+}
+
+
+bool placeIdinList(PlaceId check, PlaceId *list, int ListCount) {
+	for (int i = 0 ; i < ListCount; i++) {
+		if (check == list[i]) {
+			return true;
+		}
+	}
+	return false;
 }
