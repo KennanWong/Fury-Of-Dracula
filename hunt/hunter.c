@@ -30,7 +30,12 @@ void decideHunterMove(HunterView hv)
 	// first move
     if(HvGetPlayerLocation(hv,HvGetPlayer(hv)) == NOWHERE) {
 		printf("players first move\n");
-		registerBestPlay("AL","This is a message");
+		Player currPlayer = HvGetPlayer(hv);
+		// Assign hunters to different locations
+		if(currPlayer == PLAYER_LORD_GODALMING) registerBestPlay("BC","This is a message");
+		if(currPlayer == PLAYER_DR_SEWARD) registerBestPlay("ZA","This is a message");
+		if(currPlayer == PLAYER_VAN_HELSING) registerBestPlay("ST","This is a message");
+		if(currPlayer == PLAYER_MINA_HARKER) registerBestPlay("BR","This is a message");
 		return;
 	}
 	else {
@@ -53,7 +58,36 @@ void decideHunterMove(HunterView hv)
 		// PlaceId toGo;
 		if (dest == NOWHERE) {
 			printf("we dont know where dracula is\n");
-			toGo = canGo[0];
+			Player current = HvGetPlayer(hv);
+			// If the current player is LORD GODALMING
+			if(current == PLAYER_LORD_GODALMING) toGo = canGo[0];
+
+			// If the current player is DR SEWARD
+			else if(current == PLAYER_DR_SEWARD) {
+				// If we are Dr Seward, Lord Godalming has already made his turn, thus make sure Dr Seward does not go to 
+				// current location of Lord Godalming
+				if(HvGetPlayerLocation(hv, PLAYER_LORD_GODALMING) == canGo[0]) toGo = canGo[1];
+				else toGo = canGo[0];
+			}
+
+			// If the current player is Van Helsing
+			else if(current == PLAYER_VAN_HELSING) {
+				// If we are Dr Seward, Lord Godalming & Dr Seward has already made his turn, thus make sure Dr Seward does not go to 
+				// current location of Lord Godalming & Dr Seward
+				if(HvGetPlayerLocation(hv, PLAYER_LORD_GODALMING) == canGo[0]) toGo = canGo[1];
+				else if (HvGetPlayerLocation(hv, PLAYER_DR_SEWARD) == canGo[0]) toGo = canGo[1];
+				else toGo = canGo[0];
+			}
+
+			// If the current player is Mina Harker
+			else {
+				// If we are Dr Seward, Lord Godalming & Dr Seward & Van Helsing has already made his turn, thus make sure Dr Seward does not go to 
+				// current location of Lord Godalming & Dr Seward & Van Helsing
+				if(HvGetPlayerLocation(hv, PLAYER_LORD_GODALMING) == canGo[0]) toGo = canGo[1];
+				else if (HvGetPlayerLocation(hv, PLAYER_DR_SEWARD) == canGo[0]) toGo = canGo[1];
+				else if (HvGetPlayerLocation(hv, PLAYER_VAN_HELSING) == canGo[0]) toGo = canGo[1];
+				else toGo = canGo[0];
+			}
 		} else {
 			printf("draculas location %s\n", placeIdToName(dest));
 			int pathLength = 0;
