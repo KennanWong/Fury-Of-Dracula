@@ -14,9 +14,12 @@
 #include "HunterView.h"
 #include <stdio.h>
 
+bool placeIdinList(PlaceId check, PlaceId *list, int ListCount);
+
 void decideHunterMove(HunterView hv)
 {
 	// TODO: Replace this with something better!
+	printf("hunvter AI v1.2\n");
 	printf("now deciding hunter move\n");
 	Player currPlayer = HvGetPlayer(hv);
 	PlaceId currLoc = HvGetPlayerLocation(hv, currPlayer);
@@ -58,46 +61,48 @@ void decideHunterMove(HunterView hv)
 		// PlaceId toGo;
 		if (dest == NOWHERE) {
 			printf("we dont know where dracula is\n");
-			Player current = HvGetPlayer(hv);
+			// Player current = HvGetPlayer(hv);
 			// If the current player is LORD GODALMING
-			if(current == PLAYER_LORD_GODALMING) toGo = canGo[0];
 
-			// If the current player is DR SEWARD
-			else if(current == PLAYER_DR_SEWARD) {
-				// If we are Dr Seward, Lord Godalming has already made his turn, thus make sure Dr Seward does not go to 
-				// current location of Lord Godalming
-				if(HvGetPlayerLocation(hv, PLAYER_LORD_GODALMING) == canGo[0]) toGo = canGo[1];
-				else toGo = canGo[0];
+			// Get array of players past locations
+
+			PlaceId *CurrentLocOfPlayers = malloc(sizeof(PlaceId)*4);
+			for (int i = 0; i < 4; i++) {
+				CurrentLocOfPlayers[i] = HvGetPlayerLocation(hv, i);
+			}
+			
+			for (int i = 0; i < numReturnedLocs; i++) {
+				if (!placeIdinList(canGo[i], CurrentLocOfPlayers, 4)) {
+					toGo = canGo[i];
+				}
 			}
 
-			// If the current player is Van Helsing
-			else if(current == PLAYER_VAN_HELSING) {
-				// If we are Dr Seward, Lord Godalming & Dr Seward has already made his turn, thus make sure Dr Seward does not go to 
-				// current location of Lord Godalming & Dr Seward
-				if(HvGetPlayerLocation(hv, PLAYER_LORD_GODALMING) == canGo[0]) toGo = canGo[1];
-				else if (HvGetPlayerLocation(hv, PLAYER_DR_SEWARD) == canGo[0]) toGo = canGo[1];
-				else toGo = canGo[0];
-			}
-
-			// If the current player is Mina Harker
-			else {
-				// If we are Dr Seward, Lord Godalming & Dr Seward & Van Helsing has already made his turn, thus make sure Dr Seward does not go to 
-				// current location of Lord Godalming & Dr Seward & Van Helsing
-				if(HvGetPlayerLocation(hv, PLAYER_LORD_GODALMING) == canGo[0]) toGo = canGo[1];
-				else if (HvGetPlayerLocation(hv, PLAYER_DR_SEWARD) == canGo[0]) toGo = canGo[1];
-				else if (HvGetPlayerLocation(hv, PLAYER_VAN_HELSING) == canGo[0]) toGo = canGo[1];
-				else toGo = canGo[0];
-			}
+			
 		} else {
-			printf("draculas location %s\n", placeIdToName(dest));
-			int pathLength = 0;
-			PlaceId *PathToDrac = HvGetShortestPathTo(hv, currPlayer, dest, &pathLength);
-			toGo = PathToDrac[0];
-			free(PathToDrac);
+			if (dest == NOWHERE) {
+				printf("we dont know where dracula is\n");
+				toGo = canGo[0];
+			} else {
+				printf("draculas location %s\n", placeIdToName(dest));
+				int pathLength = 0;
+				PlaceId *PathToDrac = HvGetShortestPathTo(hv, currPlayer, dest, &pathLength);
+				toGo = PathToDrac[0];
+				free(PathToDrac);
+			}
 		}
 		
 		registerBestPlay(placeIdToAbbrev(toGo),"This is a message");
 		free(canGo);
 	}
     return;
+}
+
+
+bool placeIdinList(PlaceId check, PlaceId *list, int ListCount) {
+	for (int i = 0 ; i < ListCount; i++) {
+		if (check == list[i]) {
+			return true;
+		}
+	}
+	return false;
 }
