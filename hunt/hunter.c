@@ -19,7 +19,7 @@ bool placeIdinList(PlaceId check, PlaceId *list, int ListCount);
 void decideHunterMove(HunterView hv)
 {
 	// TODO: Replace this with something better!
-	printf("hunvter AI v1.1\n");
+	printf("hunvter AI v1.2\n");
 	printf("now deciding hunter move\n");
 	Player currPlayer = HvGetPlayer(hv);
 	PlaceId currLoc = HvGetPlayerLocation(hv, currPlayer);
