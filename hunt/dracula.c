@@ -23,52 +23,6 @@ PlaceId analysemoves(DraculaView dv, PlaceId *possiblemoves, int numReturnedLocs
 int Trail(DraculaView dv, PlaceId place);
 
 void decideDraculaMove(DraculaView dv) {
-<<<<<<< HEAD
-	// Trail Helper method
-	int Trail(DraculaView dv, PlaceId place) {
-
-		PlaceId *trail = malloc(sizeof(*trail)*TRAIL_SIZE);
-		//draculatrail(dv, PLAYER_DRACULA, trail);
-		for (int i = 0; i < TRAIL_SIZE; i++) {
-			if (trail[i] == place) {
-				return 1; //True
-			}
-		}
-		return 0;//False
-	}
-
-	// Analysemoves helper method
-	PlaceId analysemoves(DraculaView dv, PlaceId *possiblemoves, int numReturnedLocs1) {
-
-		int finalmove = NOWHERE;
-
-		printf("possible places drac can travel to");
-
-		for (int i = 0; i < numReturnedLocs1; i++) {
-			printf("%d\n", possiblemoves[i]);
-		}
-
-		for (int i = 0; i < numReturnedLocs1 && Trail(dv, possiblemoves[i]); i++) {
-			finalmove = possiblemoves[i];
-		}
-
-		return finalmove;
-	}
-
-	int numReturnedLocs1;
-	
-	if (DvGetPlayerLocation(dv, PLAYER_DRACULA) == UNKNOWN_PLACE) {
-		registerBestPlay("GE", "going to Geneva");
-		return;
-	}
-
-	int *possiblemoves = DvWhereCanIGo(dv, &numReturnedLocs1);
-	int finalmove =  analysemoves(dv, possiblemoves, numReturnedLocs1);
-
-	registerBestPlay(placeIdToAbbrev(finalmove), "Mwuhahahaha");
-}
-
-=======
 	if (DvGetPlayerLocation(dv, PLAYER_DRACULA) == NOWHERE) {
 		registerBestPlay("CD", "MWUHAHAHHHA");
 		return;
@@ -88,5 +42,37 @@ void decideDraculaMove(DraculaView dv) {
 		free(canGo);
 		return;
 	}
+
+	// check heath every round.
+	int draculaHealth = DvGetHealth(dv, PLAYER_DRACULA);
+
+	// if health is less than half go to castle dracula. 
+	if (draculaHealth <= 20) {
+		printf("Low health, moving to castle dracula\n");
+		
+		// road only
+		PlaceId *goList = DvWhereCanIGoByType(dv, true, false, &returnedLoc);
+		for (int i = 0; &goList[i] != NULL; i++) {
+			if (goList[i] == CASTLE_DRACULA) {
+				registerBestPlay(placeIdToAbbrev(goList[i]), "MWUHAHAHHHA");
+				break;
+			}
+		}
+		return;
+	}
+
+	// if draculaHealth is critically low.
+	if (draculaHealth <= 10) {
+		printf("Very Low health, moving to castle dracula\n");
+		
+		// will use both boat and road
+		PlaceId *goList = DvWhereCanIGoByType(dv, true, true, &returnedLoc);
+		for (int i = 0; &goList[i] != NULL; i++) {
+			if (goList[i] == CASTLE_DRACULA) {
+				registerBestPlay(placeIdToAbbrev(goList[i]), "MWUHAHAHHHA");
+				break;
+			}
+		}
+		return;
+	}
 }
->>>>>>> ac6775c63e7efb5c32d14c67ceb8daab40790d7a
